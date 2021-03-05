@@ -2,11 +2,17 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Hello World!</title>
+    <title>ctl-form-processor</title>
     <link rel="stylesheet" href="index.css">
   </head>
   <body>
-    <h1>💖 Hello World!</h1>
-    <p>Welcome to your Electron application.</p>
+    <h1>ctl-form-processor</h1>
+    <form enctype="multipart/form-data" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+      <label for="input">File: </label>
+      <input id="input" type="file" multiple>
+    </form>
+    <script type="module">
+      require('./index.js');
+    </script>
   </body>
 </html>
