@@ -5,24 +5,222 @@ const input = document.getElementById("input");
 
 // Read file input
 input.addEventListener("change", () => {
-   const data = [];
+   try{
+      const insertStmnts = [];
 
-   // Extract .xlsx data by cell
-   reader(input.files[0]).then((rows) => {
-      for (let i = 1; i < rows.length; i++){
-         for (let j = 0; j < rows[i].length; j++){
-            let sql = insertStatement;
-            console.log(rows[i][j]);
+      // Extract .xlsx data by cell
+      reader(input.files[0]).then((rows) => {
+         for (let i = 1; i < rows.length; i++){
+            let sql = "";
+
+             /* -----GENERATE "FINAL VERSION" FORM----- */
+
+            // code
+            sql += rows[i][0];
+
+            // CampID
+            sql += formatCell("temp");
+
+            // PartnerID
+            sql += formatCell(partnerIDs[rows[i][5]]);
+
+            // CampProgram
+            sql += formatCell(rows[i][6]);
+
+            // SummerOrNonSummer
+            sql += formatCell(rows[i][9]);
+
+            // SiteLocation
+            sql += formatCell(rows[i][7]);
+
+            // CamperType
+            sql += formatCell(rows[i][8]);
+
+            // StartDate
+            sql += formatCell(rows[i][17]);
+
+            // EndDate
+            sql += formatCell(rows[i][18]);
+
+            // CheckInTime
+            sql += formatCell(rows[i][19], true); // FORMAT THIS TIME
+
+            // CheckOutTime
+            sql += formatCell(rows[i][20], true); // FORMAT THIS TIME
+
+            // CamperDays
+            sql += formatCell(0); // No value?
+
+            // CamperMeals
+            sql += formatCell(0); // No value?
+
+            // VolunteerDays
+            sql += formatCell(0); // No value?
+
+            // VolunteerMeals
+            sql += formatCell(0); // No value?
+
+            // BillingContactName
+            sql += formatCell(rows[i][26]);
+
+            // BillingContactEmail
+            sql += formatCell(rows[i][27]);
+
+            // BillingContactPhone
+            sql += formatCell(rows[i][28]);
+
+            // BillingContactAddress
+            sql += formatCell(rows[i][29]);
+
+            // BillingContactCity
+            sql += formatCell(rows[i][30]);
+
+            // BillingContactState
+            sql += formatCell(rows[i][31]);
+
+            // BillingContactZip
+            sql += formatCell(rows[i][32]);
+
+            // CampContactName
+            sql += formatCell(rows[i][33]);
+
+            // CampContactEmail
+            sql += formatCell(rows[i][34]);
+
+            // CampContactPhone
+            sql += formatCell(rows[i][35]);
+
+            // CampContactAdress
+            sql += formatCell(rows[i][36]);
+
+            // CampContactCity
+            sql += formatCell(rows[i][37]);
+
+            // CampContactState
+            sql += formatCell(rows[i][38]);
+
+            // CampContactZip
+            // Check if someone used "NA" for their second contact
+            if (rows[i][33] == "NA"){
+               sql += formatCell(rows[i][39]);
+            }
+            else{
+               sql += formatCell(0); // No value?
+            }
+            
+            // CTLStaffContact
+            sql += formatCell(""); // No value?
+
+            // CTLDirected
+            sql += formatCell(0); // No value?
+
+            // PreArrivalFormsComplete
+            sql += formatCell(0); // No value?
+
+            // IntacctCampSessionID
+            sql += formatCell(0); // No value?
+
+            // ProgramNotes
+            sql += formatCell(""); // No value?
+
+            // FoodServiceNotes
+            sql += formatCell(""); // No value?
+
+            // FacilityNotes
+            sql += formatCell(""); // No value?
+
+            // IncidentNodes
+            sql += formatCell(""); // No value?
+
+            // PartnershipNotes 
+            sql += formatCell(""); // No value?
+
+            // ProgramNeeds
+            sql += formatCell(rows[i][25]);
+
+            // MealsRequested
+            sql += formatCell(rows[i][21]);
+
+            // CabinsProjected
+            sql += formatCell(rows[i][22]);
+
+            // BuildingNeeds
+            sql += formatCell(rows[i][23]);
+
+            // EquipmentNeeds
+            sql += formatCell(rows[i][24]);
+
+            // FullProgramStaff
+            sql += formatCell(""); // No value?
+
+            // DayStaff
+            sql += formatCell(""); // No value?
+                           
+            // NeedsNotes
+            sql += formatCell(rows[i][40]);
+
+            // CampCancelled
+            sql += formatCell(0); // No value?
+
+            // DirMedicalTeam
+            sql += formatCell(0); // No value?
+
+            // DirMedicalTeamNotes
+            sql += formatCell(""); // No value?
+
+            // DirBillableHours
+            sql += formatCell(""); // No value?
+
+            // DirBillableHoursNotes
+            sql += formatCell(""); // No value?
+
+            // DirVolunteers
+            sql += formatCell(""); // No value?
+
+            // DirStaffingRatioNotes
+            sql += formatCell(""); // No value?
+
+            // DirAddIEveningProgram
+            sql += formatCell(0); // No value?
+
+            // DirTshirts
+            sql += formatCell(0); // No value?
+
+            // DirPhotography
+            sql += formatCell(0); // No value?
+
+            // DirNotes
+            sql += formatCell(""); // No value?
+
+            // Horseback
+            // Change any 0's to blank cells
+            if (rows[i][16] == 0){
+               // Blank
+               sql += formatCell(""); // No value?
+            }
+            else{
+               sql += formatCell(rows[i][16]);
+            }
+            
+            // Add SQL insert statement to list
+            insertStmnts.push(sql);
          }
-      }
-   });
-})
 
-// First part of the SQL insert statement (static)
-const insertStatement = "INSERT into DBO.CAMPSESSIONS ([CampID],[PartnerID],[CampProgram],[SummerOrNonSummer],[SiteLocation],[CamperType],[StartDate],[EndDate],[CheckInTime],[CheckOutTime],[CamperDays],[CamperMeals],[VolunteerDays],[VolunteerMeals],[BillingContactName],[BillingContactEmail],[BillingContactPhone],[BillingContactAddress],[BillingContactCity],[BillingContactState],[BillingContactZip],[CampContactName],[CampContactEmail],[CampContactPhone],[CampContactAdress],[CampContactCity],[CampContactState],[CampContactZip],[CTLStaffContact],[CTLDirected],[PreArrivalFormsComplete],[IntacctCampSessionID],[ProgramNotes],[FoodServiceNotes],[FacilityNotes],[IncidentNotes],[PartnershipNotes],[ProgramNeeds],[MealsRequested],[CabinsProjected],[BuildingNeeds],[EquipmentNeeds],[FullProgramStaff],[DayStaff],[NeedsNotes],[CampCancelled],[DirMedicalTeam],[DirMedicalTeamNotes],[DirBillableHours],[DirBillableHoursNotes],[DirVolunteers],[DirStaffingRatioNotes],[DirAddlEveningProgram],[DirTshirts],[DirPhotography],[DirNotes]) VALUES (";
+         // Send to backend
+         ipc.send("data", insertStmnts);
+      });
+   }
+   catch(e){
+      console.error(e);
+   }
+});
+   
+function formatCell(data){
+   return ",'" + data + "'";
+}
 
 // Partner Organization dictionary
-const parterIDs = {
+const partnerIDs = {
    "American Lung Association": 1,
    "Girl Scouts of Greater Atlanta": 2,
    "Annandale Village": 3,

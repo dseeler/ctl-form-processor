@@ -37,7 +37,7 @@ const createWindow = () => {
   window.webContents.openDevTools();
 };
 
-ipc.on("test", (event, arg) => {
+ipc.on("data", (event, arg) => {
   console.log(arg);
 });
 
