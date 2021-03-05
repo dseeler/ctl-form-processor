@@ -13,10 +13,10 @@ input.addEventListener("change", () => {
          for (let i = 1; i < rows.length; i++){
             let sql = "";
 
-             /* -----GENERATE "FINAL VERSION" FORM----- */
+             /* -----GENERATE "FINAL VERSION" DATA----- */
 
             // code
-            sql += rows[i][0];
+            sql += insertPrefix + "'";
 
             // CampID
             sql += formatCell("temp");
@@ -37,16 +37,16 @@ input.addEventListener("change", () => {
             sql += formatCell(rows[i][8]);
 
             // StartDate
-            sql += formatCell(rows[i][17]);
+            sql += formatCell(rows[i][17], "date");
 
             // EndDate
-            sql += formatCell(rows[i][18]);
+            sql += formatCell(rows[i][18], "date");
 
             // CheckInTime
-            sql += formatCell(rows[i][19], true); // FORMAT THIS TIME
+            sql += formatCell(rows[i][19], "time"); // FORMAT THIS TIME
 
             // CheckOutTime
-            sql += formatCell(rows[i][20], true); // FORMAT THIS TIME
+            sql += formatCell(rows[i][20], "time"); // FORMAT THIS TIME
 
             // CamperDays
             sql += formatCell(0); // No value?
@@ -194,7 +194,7 @@ input.addEventListener("change", () => {
 
             // Horseback
             // Change any 0's to blank cells
-            if (rows[i][16] == 0){
+            if (rows[i][16] == null || rows[i][16] == 0){
                // Blank
                sql += formatCell(""); // No value?
             }
@@ -202,12 +202,15 @@ input.addEventListener("change", () => {
                sql += formatCell(rows[i][16]);
             }
             
+            // Close VALUES
+            sql += ")";
+
             // Add SQL insert statement to list
             insertStmnts.push(sql);
          }
 
          // Send to backend
-         ipc.send("data", insertStmnts);
+         ipc.send("data", insertStmnts[0]);
       });
    }
    catch(e){
@@ -215,9 +218,63 @@ input.addEventListener("change", () => {
    }
 });
    
-function formatCell(data){
+function formatCell(data, type){
+   // Specific formatting (i.e. time)
+   switch (type){
+      case "time":
+         const hour = data.substring(0, data.indexOf(":"));
+         const minute = data.substring(data.indexOf(":"), data.indexOf(":") + 3);
+         if (data.includes("AM")){
+            data = hour + minute + " AM";
+         }
+         else if (data.includes("PM")){
+            data = hour + minute + " PM";
+         }
+      break; 
+      case "date":
+         data = data.toString();
+         data = data.substring(4, data.indexOf("202") + 4);
+         const month = getMonth(data.substring(0, 3));
+         data = data.substring(4);
+         const day = data.substring(0, data.indexOf(" "));
+         const year = data.substring(data.indexOf(" ") + 1, data.indexOf(" ") + 5);
+         data = month + "/" + day + "/" + year;
+      break;
+   }
    return ",'" + data + "'";
 }
+
+function getMonth(month){
+   switch (month){
+      case "Jan": 
+         return 1;
+      case "Feb":
+         return 2;
+      case "Mar":
+         return 3;
+      case "Apr":
+         return 4;
+      case "May":
+         return 5;
+      case "Jun":
+         return 6;
+      case "Jul":
+         return 7;
+      case "Aug":
+         return 8;
+      case "Sep":
+         return 9;
+      case "Oct":
+         return 10;
+      case "Nov":
+         return 11;
+      case "Dec":
+         return 12;
+   }
+}
+
+// Static prefix
+const insertPrefix = "INSERT into DBO.CAMPSESSIONS ([CampID],[PartnerID],[CampProgram],[SummerOrNonSummer],[SiteLocation],[CamperType],[StartDate],[EndDate],[CheckInTime],[CheckOutTime],[CamperDays],[CamperMeals],[VolunteerDays],[VolunteerMeals],[BillingContactName],[BillingContactEmail],[BillingContactPhone],[BillingContactAddress],[BillingContactCity],[BillingContactState],[BillingContactZip],[CampContactName],[CampContactEmail],[CampContactPhone],[CampContactAdress],[CampContactCity],[CampContactState],[CampContactZip],[CTLStaffContact],[CTLDirected],[PreArrivalFormsComplete],[IntacctCampSessionID],[ProgramNotes],[FoodServiceNotes],[FacilityNotes],[IncidentNotes],[PartnershipNotes],[ProgramNeeds],[MealsRequested],[CabinsProjected],[BuildingNeeds],[EquipmentNeeds],[FullProgramStaff],[DayStaff],[NeedsNotes],[CampCancelled],[DirMedicalTeam],[DirMedicalTeamNotes],[DirBillableHours],[DirBillableHoursNotes],[DirVolunteers],[DirStaffingRatioNotes],[DirAddlEveningProgram],[DirTshirts],[DirPhotography],[DirNotes]) VALUES (";
 
 // Partner Organization dictionary
 const partnerIDs = {
