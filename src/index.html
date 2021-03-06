@@ -6,27 +6,37 @@
     <link rel="stylesheet" href="index.css">
   </head>
   <body>
-    <h1>ctl-form-processor</h1>
-    <label for="input">File: </label>
-    <input id="input" type="file" enctype="multipart/form-data" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
-    <br>
-    <label for="username">Username: </label>
-    <input id="username" type="text">
-    <br>
-    <label for="password">Password: </label>
-    <input id="password" type="password">
-    <br>
-    <label for="server">Server: </label>
-    <input id="server" type="text">
-    <br>
-    <label for="database">Database: </label>
-    <input id="database" type="text">
-    <br>
-    <button id="sendButton">Send</button>
-    <br>
-    <div id="raw-sql"></div>
+    <div id="content-left">
+      <h1>ctl-form-processor</h1>
+      <input id="input" type="file" enctype="multipart/form-data" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+      <div id="azure-div">
+        <h3 id="azure-title">Connect to Azure SQL Server</h3>
+        <label for="username">Username: </label>
+        <input id="username" type="text">
+        <br>
+        <label for="password">Password: </label>
+        <input id="password" type="password">
+        <br>
+        <label for="server">Server: </label>
+        <input id="server" type="text">
+        <br>
+        <label for="database">Database: </label>
+        <input id="database" type="text">
+        <br>
+        <button id="sendButton">Connect & Insert Data</button>
+      </div>
+    </div>
+    <div id="content-right">
+      <h3 id="process-count">Copy-Paste Output</h3>
+      <div id="raw-sql-container">
+        <div id="raw-sql"></div>
+      </div>
+    </div>
     <script type="module">
       require('./index.js');
     </script>
+    <footer>
+      UGA Student Project 2021 | <a href="mailto: das09474@uga.edu">Contact</a> | A former camper's thanks
+    </footer>
   </body>
 </html>

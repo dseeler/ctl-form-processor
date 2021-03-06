@@ -221,7 +221,11 @@ input.addEventListener("change", () => {
             insertStmnts.push(sql);
 
             // Add raw sql to UI
-            document.getElementById("raw-sql").innerHTML += "<div>" + sql + "</div><br><br>";
+            document.getElementById("raw-sql").innerHTML += "<div>" + sql + "</div>" + 
+            "<br><span>---------------------------- <b>" + i + 
+            "</b> ----------------------------</span><br><br>";
+
+            document.getElementById("process-count").innerHTML = insertStmnts.length + " forms processed";
          }
       });
    }
