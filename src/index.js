@@ -219,6 +219,9 @@ input.addEventListener("change", () => {
 
             // Add SQL insert statement to list
             insertStmnts.push(sql);
+
+            // Add raw sql to UI
+            document.getElementById("raw-sql").innerHTML += "<div>" + sql + "</div><br><br>";
          }
       });
    }
