@@ -1,13 +1,25 @@
 const electron = require("electron");
 const ipc = electron.ipcRenderer;
 const reader = require("read-excel-file");
+
 const input = document.getElementById("input");
+const sendButton = document.getElementById("sendButton");
+
+sendButton.addEventListener("click", () => {
+   const username = document.getElementById("username").value;
+   const password = document.getElementById("password").value;
+   const server = document.getElementById("server").value;
+   const database = document.getElementById("database").value;
+
+   // Send to backend
+   ipc.send("insert_data", [insertStmnts[0], username, password, server, database]);
+
+});
 
 // Read file input
+const insertStmnts = [];
 input.addEventListener("change", () => {
    try{
-      const insertStmnts = [];
-
       // Extract .xlsx data by cell
       reader(input.files[0]).then((rows) => {
          for (let i = 1; i < rows.length; i++){
@@ -208,9 +220,6 @@ input.addEventListener("change", () => {
             // Add SQL insert statement to list
             insertStmnts.push(sql);
          }
-
-         // Send to backend
-         ipc.send("data", insertStmnts[0]);
       });
    }
    catch(e){

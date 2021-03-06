@@ -7,10 +7,18 @@
   </head>
   <body>
     <h1>ctl-form-processor</h1>
-    <form enctype="multipart/form-data" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+    
       <label for="input">File: </label>
-      <input id="input" type="file" multiple>
-    </form>
+      <input id="input" type="file" enctype="multipart/form-data" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+      <label for="username">Username: </label>
+      <input id="username" type="text">
+      <label for="password">Password: </label>
+      <input id="password" type="password">
+      <label for="server">Server: </label>
+      <input id="server" type="text">
+      <label for="database">Database: </label>
+      <input id="database" type="text">
+      <button id="sendButton">Send</button>
     <script type="module">
       require('./index.js');
     </script>
