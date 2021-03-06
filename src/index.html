@@ -8,23 +8,27 @@
   <body>
     <div id="content-left">
       <h1>ctl-form-processor</h1>
-      <input id="input" type="file" enctype="multipart/form-data" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+      <input id="input" type="file" title="" enctype="multipart/form-data" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
       <div id="azure-div">
         <h3 id="azure-title">Connect to Azure SQL Server</h3>
         <label for="username">Username: </label>
-        <input id="username" type="text">
+        <input id="username" type="text" required>
         <br>
         <label for="password">Password: </label>
-        <input id="password" type="password">
+        <input id="password" type="password" required>
         <br>
         <label for="server">Server: </label>
-        <input id="server" type="text">
+        <input id="server" type="text" required>
         <br>
         <label for="database">Database: </label>
-        <input id="database" type="text">
+        <input id="database" type="text" required>
         <br>
-        <button id="sendButton">Connect & Insert Data</button>
+        <button id="sendButton" disabled>Connect & Insert data</button>
+        <div id="status-div">
+          <span id="status"></span>
+        </div>
       </div>
+
     </div>
     <div id="content-right">
       <h3 id="process-count">Copy/Paste Output</h3>

@@ -4,6 +4,7 @@ const reader = require("read-excel-file");
 
 const input = document.getElementById("input");
 const sendButton = document.getElementById("sendButton");
+const statusMsg = document.getElementById("status");
 
 sendButton.addEventListener("click", () => {
    try{
@@ -14,20 +15,40 @@ sendButton.addEventListener("click", () => {
 
       // Send to backend
       ipc.send("insert_data", [insertStmnts, username, password, server, database]);
+      statusMsg.style.color = "black";
+      statusMsg.innerHTML = "Connecting...";
+      sendButton.disabled = true;
 
+
+      ipc.on("system_message", (event, arg) => {
+         // if arg[0] is false, system failed
+         if (!arg[0]){
+            statusMsg.style.color = "red";
+         }
+         else{
+            statusMsg.style.color = "green";
+         }
+         statusMsg.innerHTML = arg[1];
+         sendButton.disabled = false;
+      });
    }
    catch (e){
       console.error(e);
    }
 });
 
+ipc.on("hi", (event, arg) => {
+   statusMsg.innerHTML = "Asdsadasddsa";
+});
+
 // Read file input
-const insertStmnts = [];
+let insertStmnts = [];
 input.addEventListener("change", () => {
    try{
       // Clear existing output
+      insertStmnts = [];
       document.getElementById("raw-sql").innerHTML = "";
-      document.getElementById("process-count").innerHTML = "";
+      document.getElementById("process-count").innerHTML = "Processing...";
 
       // Extract .xlsx data by cell
       reader(input.files[0]).then((rows) => {
@@ -236,6 +257,9 @@ input.addEventListener("change", () => {
 
             document.getElementById("process-count").innerHTML = insertStmnts.length + " forms processed";
          }
+
+         // Enable Connect & Insert Data button
+         sendButton.disabled = false;
       });
    }
    catch(e){

@@ -73,14 +73,17 @@ ipc.on("insert_data", (event, arg) => {
     };
 
     const connection = new Connection(config);
+    connection.connect();
 
     // Attempt to connect and execute queries if connection goes through
     connection.on("connect", err => {
       if (err) {
+        event.reply("system_message", [false, "Invalid credentials: Unable to connect"]);
         console.error(err.message);
       } 
       else {
         insertData();
+        event.reply("system_message", [true, "Database updated!"]);
       }
     });
 
@@ -88,6 +91,7 @@ ipc.on("insert_data", (event, arg) => {
       // Need to iterate through arg[0], the array of SQL inserts
       const request = new Request(arg[0][0], (err, rowCount) => {
         if (err){
+          event.reply("system_message", [false, "Invalid SQL: Unable to insert"]);
           console.error(err.message);
         }
       });

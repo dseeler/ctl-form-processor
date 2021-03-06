@@ -24,10 +24,10 @@ body {
 
 #input{
   margin-top: -10px;
-  margin-bottom: 30px;
+  margin-bottom: 15px;
   background-color: white;
   border: 1px dashed black;
-  padding: 50px 58px 50px 58px;
+  padding: 87px 58px 87px 58px;
 }
 
 #input[type="file"]:hover{
@@ -59,6 +59,18 @@ body {
   border: 1px solid black;
 }
 
+#system-msgs-container{
+  background-color: white;
+  font-size: 12px;
+  width: 100%;
+  height: 10%;
+  margin-left: auto;
+  margin-right: auto;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  border: 1px solid black;
+}
+
 input, #raw-sql-container, #azure-div{
   opacity: .8;
 }
@@ -68,6 +80,12 @@ input, #raw-sql-container, #azure-div{
   background-color: white;
   height: 250px;
   padding-left: 20px;
+}
+
+#status-div{
+  margin-top: 6px;
+  font-size: 12px;
+  text-align: center;
 }
 
 #azure-div label {
@@ -86,7 +104,7 @@ input, #raw-sql-container, #azure-div{
 
 #sendButton {
   padding: 0 20px 0 20px;
-  margin-top: 15px;
+  margin-top: 12px;
   margin-left: 80px;
 }
 
@@ -95,6 +113,7 @@ input, #raw-sql-container, #azure-div{
 }
 
 footer{
+  font-size: 14px;
   position: absolute;
   width: 100%;
   height: 30px;
