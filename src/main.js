@@ -21,7 +21,6 @@ const createWindow = () => {
   const window = new BrowserWindow({
     width: 800,
     height: 600,
-    icon: __dirname + "images/logo.png",
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
@@ -35,7 +34,7 @@ const createWindow = () => {
   }));
 
   window.on("closed", () => {
-    window = null
+    window = null;
   });
 
   window.webContents.openDevTools();
@@ -86,7 +85,8 @@ ipc.on("insert_data", (event, arg) => {
     });
 
     function insertData(){
-      const request = new Request(arg[0], (err, rowCount) => {
+      // Need to iterate through arg[0], the array of SQL inserts
+      const request = new Request(arg[0][0], (err, rowCount) => {
         if (err){
           console.error(err.message);
         }

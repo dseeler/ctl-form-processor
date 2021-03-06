@@ -6,20 +6,29 @@ const input = document.getElementById("input");
 const sendButton = document.getElementById("sendButton");
 
 sendButton.addEventListener("click", () => {
-   const username = document.getElementById("username").value;
-   const password = document.getElementById("password").value;
-   const server = document.getElementById("server").value;
-   const database = document.getElementById("database").value;
+   try{
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      const server = document.getElementById("server").value;
+      const database = document.getElementById("database").value;
 
-   // Send to backend
-   ipc.send("insert_data", [insertStmnts[0], username, password, server, database]);
+      // Send to backend
+      ipc.send("insert_data", [insertStmnts, username, password, server, database]);
 
+   }
+   catch (e){
+      console.error(e);
+   }
 });
 
 // Read file input
 const insertStmnts = [];
 input.addEventListener("change", () => {
    try{
+      // Clear existing output
+      document.getElementById("raw-sql").innerHTML = "";
+      document.getElementById("process-count").innerHTML = "";
+
       // Extract .xlsx data by cell
       reader(input.files[0]).then((rows) => {
          for (let i = 1; i < rows.length; i++){
@@ -230,6 +239,7 @@ input.addEventListener("change", () => {
       });
    }
    catch(e){
+      document.getElementById("raw-sql").innerHTML = "<div style='color: red'>Error: Invalid .xlsx file</div>";
       console.error(e);
    }
 });

@@ -90,6 +90,10 @@ input, #raw-sql-container, #azure-div{
   margin-left: 80px;
 }
 
+#sendButton:hover {
+  cursor: pointer;
+}
+
 footer{
   position: absolute;
   width: 100%;
