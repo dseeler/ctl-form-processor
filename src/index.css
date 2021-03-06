@@ -35,6 +35,10 @@ body {
   background-color: whitesmoke;
 }
 
+#input[type="file"]:focus{
+  outline: none;
+}
+
 #content-right{
   width: 400px;
   height: 100%;
