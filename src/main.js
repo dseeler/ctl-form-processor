@@ -21,6 +21,7 @@ const createWindow = () => {
   const window = new BrowserWindow({
     width: 800,
     height: 600,
+    icon: __dirname + "images/logo.png",
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
