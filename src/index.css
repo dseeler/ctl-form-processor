@@ -22,12 +22,21 @@ body {
   float: left;
 }
 
+#campID-div{
+  margin-top: -15px;
+  margin-bottom: 23px;
+}
+
+#campID{
+  width: 127px;
+}
+
 #input{
   margin-top: -10px;
   margin-bottom: 15px;
   background-color: white;
   border: 1px dashed black;
-  padding: 87px 58px 87px 58px;
+  padding: 73px 58px 73px 58px;
 }
 
 #input[type="file"]:hover{

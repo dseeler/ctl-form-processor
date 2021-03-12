@@ -21,6 +21,7 @@ const createWindow = () => {
   const window = new BrowserWindow({
     width: 800,
     height: 600,
+    resizable: false,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
@@ -78,24 +79,36 @@ ipc.on("insert_data", (event, arg) => {
     // Attempt to connect and execute queries if connection goes through
     connection.on("connect", err => {
       if (err) {
-        event.reply("system_message", [false, "Invalid credentials: Unable to connect"]);
+        event.reply("connect_err", ["Invalid credentials: Unable to connect"]);
         console.error(err.message);
       } 
       else {
+        event.reply("connect_success", ["Connected! Inserting data..."]);
         insertData();
-        event.reply("system_message", [true, "Database updated!"]);
       }
     });
 
     function insertData(){
-      // Need to iterate through arg[0], the array of SQL inserts
-      const request = new Request(arg[0][0], (err, rowCount) => {
+      const setIdentity = "SET IDENTITY_INSERT dbo.CAMPSESSIONS ON;\n";
+      console.log(setIdentity + arg[0]);
+      const request = new Request(setIdentity + arg[0], (err, rowCount) => {
         if (err){
-          event.reply("system_message", [false, "Invalid SQL: Unable to insert"]);
+          if (err.toString().includes("duplicate")){
+            event.reply("insert_err", ["Duplicate key error: Please update CampID"]);
+          }
+          else{
+            event.reply("insert_err", ["Invalid SQL syntax: Unable to insert"]);
+          }
           console.error(err.message);
         }
       });
       connection.execSql(request);
+
+      request.on("doneProc", (rowCount, more, returnStatus, rows) => {
+        if (returnStatus == 0){
+          event.reply("insert_success", ["Database updated!"]);
+        }
+      });
     }
   }
   catch (e){

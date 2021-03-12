@@ -7,21 +7,26 @@
   </head>
   <body>
     <div id="content-left">
-      <h1>ctl-form-processor</h1>
+      <h1>CTL Form Processor</h1>
+      <div id="campID-div">
+        <label for="campID">Next available CampID:</label>
+        <input id="campID" type="text">
+        <button id="campID-button">Update</button>
+      </div>  
       <input id="input" type="file" title="" enctype="multipart/form-data" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
       <div id="azure-div">
         <h3 id="azure-title">Connect to Azure SQL Server</h3>
         <label for="username">Username: </label>
-        <input id="username" type="text" required>
+        <input id="username" type="text" required value="uga-ctl">
         <br>
         <label for="password">Password: </label>
-        <input id="password" type="password" required>
+        <input id="password" type="password" required value="123abc_321">
         <br>
         <label for="server">Server: </label>
-        <input id="server" type="text" required>
+        <input id="server" type="text" required value="ctl.database.windows.net">
         <br>
         <label for="database">Database: </label>
-        <input id="database" type="text" required>
+        <input id="database" type="text" required value="CTL-SQL">
         <br>
         <button id="sendButton" disabled>Connect & Insert data</button>
         <div id="status-div">

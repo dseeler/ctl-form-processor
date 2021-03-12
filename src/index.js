@@ -1,35 +1,68 @@
 const electron = require("electron");
 const ipc = electron.ipcRenderer;
 const reader = require("read-excel-file");
+const fs = require("fs");
 
 const input = document.getElementById("input");
 const sendButton = document.getElementById("sendButton");
 const statusMsg = document.getElementById("status");
+const campID = document.getElementById("campID");
+const campID_button = document.getElementById("campID-button");
+setCampID();
 
 sendButton.addEventListener("click", () => {
    try{
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
-      const server = document.getElementById("server").value;
-      const database = document.getElementById("database").value;
+      const username = document.getElementById("username").value; // uga-ctl
+      const password = document.getElementById("password").value; // 123abc_321
+      const server = document.getElementById("server").value; // ctl.database.windows.net
+      const database = document.getElementById("database").value; // CTL-SQL
 
       // Send to backend
-      ipc.send("insert_data", [insertStmnts, username, password, server, database]);
+      ipc.send("insert_data", [bulkStmnt, username, password, server, database]);
       statusMsg.style.color = "black";
       statusMsg.innerHTML = "Connecting...";
       sendButton.disabled = true;
+      campID_button.disabled = true;
 
-
-      ipc.on("system_message", (event, arg) => {
-         // if arg[0] is false, system failed
-         if (!arg[0]){
-            statusMsg.style.color = "red";
-         }
-         else{
+      ipc.on("connect_success", (event, arg) => {
+         try{
             statusMsg.style.color = "green";
+            statusMsg.innerHTML = arg[0];
+            campID_button.disabled = false;
          }
-         statusMsg.innerHTML = arg[1];
-         sendButton.disabled = false;
+         catch (e){
+            console.error(e);
+         }
+      });
+
+      ipc.on("connect_err", (event, arg) => {
+         try{
+            statusMsg.style.color = "red";
+            statusMsg.innerHTML = arg[0];
+            campID_button.disabled = false;
+         }
+         catch (e){
+            console.error(e);
+         }
+      });
+
+      ipc.on("insert_success", (event, arg) => {
+         try{
+            statusMsg.style.color = "green";
+            statusMsg.innerHTML = arg[0];
+            campID_button.disabled = false;
+            const new_id = insertStmnts.length + parseInt(campID.value);
+            updateCampID(new_id.toString());
+         }
+         catch (e){
+            console.error(e);
+         }
+      });
+
+      ipc.on("insert_err", (event, arg) => {
+         statusMsg.style.color = "red";
+         statusMsg.innerHTML = arg[0];
+         campID_button.disabled = false;
       });
    }
    catch (e){
@@ -37,18 +70,20 @@ sendButton.addEventListener("click", () => {
    }
 });
 
-ipc.on("hi", (event, arg) => {
-   statusMsg.innerHTML = "Asdsadasddsa";
-});
-
 // Read file input
-let insertStmnts = [];
+let insertStmnts = []; // Copy/Paste output
+let bulkStmnt = ""; // Bulk SQL statement to be inserted into DB
 input.addEventListener("change", () => {
    try{
+
       // Clear existing output
       insertStmnts = [];
+      bulkStmnt = insertPrefix;
+
       document.getElementById("raw-sql").innerHTML = "";
       document.getElementById("process-count").innerHTML = "Processing...";
+      statusMsg.innerHTML = "";
+      statusMsg.style.color = "black";
 
       // Extract .xlsx data by cell
       reader(input.files[0]).then((rows) => {
@@ -58,184 +93,248 @@ input.addEventListener("change", () => {
              /* -----GENERATE "FINAL VERSION" DATA----- */
 
             // code
-            sql += insertPrefix + "'";
+            sql += insertPrefix + "(";
+            bulkStmnt += "(";
+
+            // 56 Insert values
+            // 56 values, should be 57 (from excel)
 
             // CampID
-            sql += formatCell("temp");
+            sql += "'" + (parseInt(campID.value) + i - 1) + "'"; // Retrieve CampID
+            bulkStmnt += "'" + (parseInt(campID.value) + i - 1) + "'";
+            
 
             // PartnerID
             sql += formatCell(partnerIDs[rows[i][5]]);
+            bulkStmnt += formatCell(partnerIDs[rows[i][5]]);
 
             // CampProgram
             sql += formatCell(rows[i][6]);
+            bulkStmnt += formatCell(rows[i][6]);
 
             // SummerOrNonSummer
             sql += formatCell(rows[i][9]);
+            bulkStmnt += formatCell(rows[i][9]);
 
             // SiteLocation
             sql += formatCell(rows[i][7]);
+            bulkStmnt += formatCell(rows[i][7]);
 
             // CamperType
             sql += formatCell(rows[i][8]);
+            bulkStmnt += formatCell(rows[i][8]);
 
             // StartDate
             sql += formatCell(rows[i][17], "date");
+            bulkStmnt += formatCell(rows[i][17], "date");
 
             // EndDate
             sql += formatCell(rows[i][18], "date");
+            bulkStmnt += formatCell(rows[i][18], "date");
 
             // CheckInTime
-            sql += formatCell(rows[i][19], "time"); // FORMAT THIS TIME
+            sql += formatCell(rows[i][19], "time"); 
+            bulkStmnt += formatCell(rows[i][19], "time");
 
             // CheckOutTime
-            sql += formatCell(rows[i][20], "time"); // FORMAT THIS TIME
+            sql += formatCell(rows[i][20], "time");
+            bulkStmnt += formatCell(rows[i][20], "time");
 
             // CamperDays
             sql += formatCell(0); // No value?
+            bulkStmnt += formatCell(0);
 
             // CamperMeals
             sql += formatCell(0); // No value?
+            bulkStmnt += formatCell(0);
 
             // VolunteerDays
             sql += formatCell(0); // No value?
+            bulkStmnt += formatCell(0);
 
             // VolunteerMeals
             sql += formatCell(0); // No value?
+            bulkStmnt += formatCell(0);
 
             // BillingContactName
             sql += formatCell(rows[i][26]);
+            bulkStmnt += formatCell(rows[i][26]);
 
             // BillingContactEmail
             sql += formatCell(rows[i][27]);
+            bulkStmnt += formatCell(rows[i][27]);
 
             // BillingContactPhone
             sql += formatCell(rows[i][28]);
+            bulkStmnt += formatCell(rows[i][28]);
 
             // BillingContactAddress
             sql += formatCell(rows[i][29]);
+            bulkStmnt += formatCell(rows[i][29]);
 
             // BillingContactCity
             sql += formatCell(rows[i][30]);
+            bulkStmnt += formatCell(rows[i][30]);
 
             // BillingContactState
             sql += formatCell(rows[i][31]);
+            bulkStmnt += formatCell(rows[i][31]);
 
             // BillingContactZip
             sql += formatCell(rows[i][32]);
+            bulkStmnt += formatCell(rows[i][32]);
 
             // CampContactName
             sql += formatCell(rows[i][33]);
+            bulkStmnt += formatCell(rows[i][33]);
 
             // CampContactEmail
             sql += formatCell(rows[i][34]);
+            bulkStmnt += formatCell(rows[i][34]);
 
             // CampContactPhone
             sql += formatCell(rows[i][35]);
+            bulkStmnt += formatCell(rows[i][35]);
 
             // CampContactAdress
             sql += formatCell(rows[i][36]);
+            bulkStmnt += formatCell(rows[i][36]);
 
             // CampContactCity
             sql += formatCell(rows[i][37]);
+            bulkStmnt += formatCell(rows[i][37]);
 
             // CampContactState
-            sql += formatCell(rows[i][38]);
+            //sql += formatCell(rows[i][38]);
+            sql += formatCell("GA");
+            bulkStmnt += formatCell("GA");
 
             // CampContactZip
             // Check if someone used "NA" for their second contact
             if (rows[i][33] == "NA"){
                sql += formatCell(rows[i][39]);
+               bulkStmnt += formatCell(rows[i][39]);
             }
             else{
                sql += formatCell(0); // No value?
+               bulkStmnt += formatCell(0);
             }
             
             // CTLStaffContact
             sql += formatCell(""); // No value?
+            bulkStmnt += formatCell("");
 
             // CTLDirected
             sql += formatCell(0); // No value?
+            bulkStmnt += formatCell(0);
 
             // PreArrivalFormsComplete
             sql += formatCell(0); // No value?
+            bulkStmnt += formatCell(0);
 
             // IntacctCampSessionID
             sql += formatCell(0); // No value?
+            bulkStmnt += formatCell(0);
 
             // ProgramNotes
             sql += formatCell(""); // No value?
+            bulkStmnt += formatCell("");
 
             // FoodServiceNotes
             sql += formatCell(""); // No value?
+            bulkStmnt += formatCell("");
 
             // FacilityNotes
             sql += formatCell(""); // No value?
+            bulkStmnt += formatCell("");
 
             // IncidentNodes
             sql += formatCell(""); // No value?
+            bulkStmnt += formatCell("");
 
             // PartnershipNotes 
             sql += formatCell(""); // No value?
+            bulkStmnt += formatCell("");
 
             // ProgramNeeds
             sql += formatCell(rows[i][25]);
+            bulkStmnt += formatCell(rows[i][25]);
 
             // MealsRequested
             sql += formatCell(rows[i][21]);
+            bulkStmnt += formatCell(rows[i][21]);
 
             // CabinsProjected
             sql += formatCell(rows[i][22]);
+            bulkStmnt += formatCell(rows[i][22]);
 
             // BuildingNeeds
             sql += formatCell(rows[i][23]);
+            bulkStmnt += formatCell(rows[i][23]);
 
             // EquipmentNeeds
             sql += formatCell(rows[i][24]);
+            bulkStmnt += formatCell(rows[i][24]);
 
             // FullProgramStaff
             sql += formatCell(""); // No value?
+            bulkStmnt += formatCell("");
 
             // DayStaff
             sql += formatCell(""); // No value?
+            bulkStmnt += formatCell("");
                            
             // NeedsNotes
             sql += formatCell(rows[i][40]);
+            bulkStmnt += formatCell(rows[i][40]);
 
             // CampCancelled
             sql += formatCell(0); // No value?
+            bulkStmnt += formatCell(0);
 
             // DirMedicalTeam
             sql += formatCell(0); // No value?
+            bulkStmnt += formatCell(0);
 
             // DirMedicalTeamNotes
             sql += formatCell(""); // No value?
+            bulkStmnt += formatCell("");
 
             // DirBillableHours
             sql += formatCell(""); // No value?
+            bulkStmnt += formatCell("");
 
             // DirBillableHoursNotes
             sql += formatCell(""); // No value?
+            bulkStmnt += formatCell("");
 
             // DirVolunteers
             sql += formatCell(""); // No value?
+            bulkStmnt += formatCell("");
 
             // DirStaffingRatioNotes
             sql += formatCell(""); // No value?
+            bulkStmnt += formatCell("");
 
             // DirAddIEveningProgram
             sql += formatCell(0); // No value?
+            bulkStmnt += formatCell(0);
 
             // DirTshirts
             sql += formatCell(0); // No value?
+            bulkStmnt += formatCell(0);
 
             // DirPhotography
             sql += formatCell(0); // No value?
+            bulkStmnt += formatCell(0);
 
             // DirNotes
             sql += formatCell(""); // No value?
+            bulkStmnt += formatCell("");
 
             // Horseback
             // Change any 0's to blank cells
+            /*
             if (rows[i][16] == null || rows[i][16] == 0){
                // Blank
                sql += formatCell(""); // No value?
@@ -243,9 +342,17 @@ input.addEventListener("change", () => {
             else{
                sql += formatCell(rows[i][16]);
             }
+            */
             
             // Close VALUES
-            sql += ")";
+            sql += ");";
+
+            if (i != rows.length - 1){
+               bulkStmnt += "),";
+            }
+            else{
+               bulkStmnt += ");";
+            }
 
             // Add SQL insert statement to list
             insertStmnts.push(sql);
@@ -260,6 +367,7 @@ input.addEventListener("change", () => {
 
          // Enable Connect & Insert Data button
          sendButton.disabled = false;
+         campID_button.disabled = false;
       });
    }
    catch(e){
@@ -291,6 +399,7 @@ function formatCell(data, type){
          data = month + "/" + day + "/" + year;
       break;
    }
+   console.log(data.includes("'"));
    return ",'" + data + "'";
 }
 
@@ -324,7 +433,7 @@ function getMonth(month){
 }
 
 // Static prefix
-const insertPrefix = "INSERT into DBO.CAMPSESSIONS ([CampID],[PartnerID],[CampProgram],[SummerOrNonSummer],[SiteLocation],[CamperType],[StartDate],[EndDate],[CheckInTime],[CheckOutTime],[CamperDays],[CamperMeals],[VolunteerDays],[VolunteerMeals],[BillingContactName],[BillingContactEmail],[BillingContactPhone],[BillingContactAddress],[BillingContactCity],[BillingContactState],[BillingContactZip],[CampContactName],[CampContactEmail],[CampContactPhone],[CampContactAdress],[CampContactCity],[CampContactState],[CampContactZip],[CTLStaffContact],[CTLDirected],[PreArrivalFormsComplete],[IntacctCampSessionID],[ProgramNotes],[FoodServiceNotes],[FacilityNotes],[IncidentNotes],[PartnershipNotes],[ProgramNeeds],[MealsRequested],[CabinsProjected],[BuildingNeeds],[EquipmentNeeds],[FullProgramStaff],[DayStaff],[NeedsNotes],[CampCancelled],[DirMedicalTeam],[DirMedicalTeamNotes],[DirBillableHours],[DirBillableHoursNotes],[DirVolunteers],[DirStaffingRatioNotes],[DirAddlEveningProgram],[DirTshirts],[DirPhotography],[DirNotes]) VALUES (";
+const insertPrefix = "INSERT into DBO.CAMPSESSIONS ([CampID],[PartnerID],[CampProgram],[SummerOrNonSummer],[SiteLocation],[CamperType],[StartDate],[EndDate],[CheckInTime],[CheckOutTime],[CamperDays],[CamperMeals],[VolunteerDays],[VolunteerMeals],[BillingContactName],[BillingContactEmail],[BillingContactPhone],[BillingContactAddress],[BillingContactCity],[BillingContactState],[BillingContactZip],[CampContactName],[CampContactEmail],[CampContactPhone],[CampContactAdress],[CampContactCity],[CampContactState],[CampContactZip],[CTLStaffContact],[CTLDirected],[PreArrivalFormsComplete],[IntacctCampSessionID],[ProgramNotes],[FoodServiceNotes],[FacilityNotes],[IncidentNotes],[PartnershipNotes],[ProgramNeeds],[MealsRequested],[CabinsProjected],[BuildingNeeds],[EquipmentNeeds],[FullProgramStaff],[DayStaff],[NeedsNotes],[CampCancelled],[DirMedicalTeam],[DirMedicalTeamNotes],[DirBillableHours],[DirBillableHoursNotes],[DirVolunteers],[DirStaffingRatioNotes],[DirAddlEveningProgram],[DirTshirts],[DirPhotography],[DirNotes]) VALUES ";
 
 // Partner Organization dictionary
 const partnerIDs = {
@@ -404,3 +513,41 @@ const partnerIDs = {
    "Destination Outreach": 91,
    "Experience Camps": 92
 };
+
+function setCampID(){
+   try{
+      fs.readFile("src/camp_id.txt", (err, buf) => {
+         campID.value = buf.toString();
+      });
+   }
+   catch (e){
+      console.error(e);
+   }
+}
+
+function updateCampID(id){
+   try{
+      fs.writeFile("src/camp_id.txt", id, (err) => {
+         if (err){
+            console.log(err);
+         }
+      });
+      campID.value = id;
+   }
+   catch (e){
+      console.error(e);
+   }
+}
+
+campID_button.addEventListener("click", () => {
+   try{
+      fs.writeFile("src/camp_id.txt", campID.value, (err) => {
+         if (err){
+            console.log(err);
+         }
+      });
+   }
+   catch (e){
+      console.error(e);
+   }
+});
