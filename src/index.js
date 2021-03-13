@@ -35,7 +35,7 @@ sendButton.addEventListener("click", () => {
          }
       });
 
-      ipc.on("connect_err", (event, arg) => {
+      ipc.on("err", (event, arg) => {
          try{
             statusMsg.style.color = "red";
             statusMsg.innerHTML = arg[0];
@@ -58,12 +58,6 @@ sendButton.addEventListener("click", () => {
             console.error(e);
          }
       });
-
-      ipc.on("insert_err", (event, arg) => {
-         statusMsg.style.color = "red";
-         statusMsg.innerHTML = arg[0];
-         campID_button.disabled = false;
-      });
    }
    catch (e){
       console.error(e);
@@ -73,7 +67,7 @@ sendButton.addEventListener("click", () => {
 // Read file input
 let insertStmnts = []; // Copy/Paste output
 let bulkStmnt = ""; // Bulk SQL statement to be inserted into DB
-input.addEventListener("change", () => {
+input.addEventListener("input", () => {
    try{
 
       // Clear existing output
@@ -181,8 +175,8 @@ input.addEventListener("change", () => {
             bulkStmnt += formatCell(rows[i][31]);
 
             // BillingContactZip
-            sql += formatCell(rows[i][32]);
-            bulkStmnt += formatCell(rows[i][32]);
+            sql += formatCell(rows[i][32], "zip");
+            bulkStmnt += formatCell(rows[i][32], "zip");
 
             // CampContactName
             sql += formatCell(rows[i][33]);
@@ -205,15 +199,14 @@ input.addEventListener("change", () => {
             bulkStmnt += formatCell(rows[i][37]);
 
             // CampContactState
-            //sql += formatCell(rows[i][38]);
-            sql += formatCell("GA");
-            bulkStmnt += formatCell("GA");
+            sql += formatCell(rows[i][38], "state");
+            bulkStmnt += formatCell(rows[i][38], "state");
 
             // CampContactZip
             // Check if someone used "NA" for their second contact
             if (rows[i][33] == "NA"){
-               sql += formatCell(rows[i][39]);
-               bulkStmnt += formatCell(rows[i][39]);
+               sql += formatCell(rows[i][39], "zip");
+               bulkStmnt += formatCell(rows[i][39], "zip");
             }
             else{
                sql += formatCell(0); // No value?
@@ -368,7 +361,7 @@ input.addEventListener("change", () => {
          // Enable Connect & Insert Data button
          sendButton.disabled = false;
          campID_button.disabled = false;
-      });
+      }).catch(error => console.log(error));
    }
    catch(e){
       document.getElementById("raw-sql").innerHTML = "<div style='color: red'>Error: Invalid .xlsx file</div>";
@@ -377,20 +370,38 @@ input.addEventListener("change", () => {
 });
    
 function formatCell(data, type){
-   // Specific formatting (i.e. time)
+   if (data != null){
+      data = data.toString().replaceAll("'", "").trim(); // Remove all '
+   }
+   else{
+      data = ""; // Replace nulls
+   }
+
+   // Specific formatting
    switch (type){
       case "time":
-         const hour = data.substring(0, data.indexOf(":"));
-         const minute = data.substring(data.indexOf(":"), data.indexOf(":") + 3);
-         if (data.includes("AM")){
-            data = hour + minute + " AM";
+         if (data.includes(":")){
+            const hour = data.substring(0, data.indexOf(":"));
+            const minute = data.substring(data.indexOf(":"), data.indexOf(":") + 3);
+            if (data.toUpperCase().includes("AM")){
+               data = hour + minute + " AM";
+            }
+            else if (data.toUpperCase().includes("PM")){
+               data = hour + minute + " PM";
+            }
          }
-         else if (data.includes("PM")){
-            data = hour + minute + " PM";
+         else if (/\d/.test(data)){
+            const hour = data.match(/\d/)[0];
+            const minute = ":00";
+            if (data.toUpperCase().includes("AM")){
+               data = hour + minute + " AM";
+            }
+            else if (data.toUpperCase().includes("PM")){
+               data = hour + minute + " PM";
+            }
          }
       break; 
       case "date":
-         data = data.toString();
          data = data.substring(4, data.indexOf("202") + 4);
          const month = getMonth(data.substring(0, 3));
          data = data.substring(4);
@@ -398,8 +409,26 @@ function formatCell(data, type){
          const year = data.substring(data.indexOf(" ") + 1, data.indexOf(" ") + 5);
          data = month + "/" + day + "/" + year;
       break;
+      case "zip":
+         if (data.length >= 5){
+            data = data.substring(0, 5);
+         }
+      break;
+      case "state":
+         if (data.length > 2){
+            for (let state in state_abbrev){
+               if (data.toLowerCase().includes(state)){
+                  data = state_abbrev[state];
+                  break;
+               }
+            }
+            data = "";
+         }
+         else{
+            data = data.toUpperCase();
+         }
+      break;
    }
-   console.log(data.includes("'"));
    return ",'" + data + "'";
 }
 
@@ -513,6 +542,65 @@ const partnerIDs = {
    "Destination Outreach": 91,
    "Experience Camps": 92
 };
+
+const state_abbrev = {
+   'alabama': 'AL',
+   'alaska': 'AK',
+   'american samoa': 'AS',
+   'arizona': 'AZ',
+   'arkansas': 'AR',
+   'california': 'CA',
+   'colorado': 'CO',
+   'connecticut': 'CT',
+   'delaware': 'DE',
+   'district of columbia': 'DC',
+   'florida': 'FL',
+   'georgia': 'GA',
+   'guam': 'GU',
+   'hawaii': 'HI',
+   'idaho': 'ID',
+   'illinois': 'IL',
+   'indiana': 'IN',
+   'iowa': 'IA',
+   'kansas': 'KS',
+   'kentucky': 'KY',
+   'louisiana': 'LA',
+   'maine': 'ME',
+   'maryland': 'MD',
+   'massachusetts': 'MA',
+   'michigan': 'MI',
+   'minnesota': 'MN',
+   'mississippi': 'MS',
+   'missouri': 'MO',
+   'montana': 'MT',
+   'nebraska': 'NE',
+   'nevada': 'NV',
+   'new hampshire': 'NH',
+   'new jersey': 'NJ',
+   'new mexico': 'NM',
+   'new york': 'NY',
+   'north carolina': 'NC',
+   'north dakota': 'ND',
+   'northern mariana islands':'MP',
+   'ohio': 'OH',
+   'oklahoma': 'OK',
+   'oregon': 'OR',
+   'pennsylvania': 'PA',
+   'puerto Rico': 'PR',
+   'rhode Island': 'RI',
+   'south carolina': 'SC',
+   'south dakota': 'SD',
+   'tennessee': 'TN',
+   'texas': 'TX',
+   'utah': 'UT',
+   'vermont': 'VT',
+   'virgin islands': 'VI',
+   'virginia': 'VA',
+   'washington': 'WA',
+   'west virginia': 'WV',
+   'wisconsin': 'WI',
+   'wyoming': 'WY'
+}
 
 function setCampID(){
    try{

@@ -38,7 +38,7 @@ const createWindow = () => {
     window = null;
   });
 
-  window.webContents.openDevTools();
+  //window.webContents.openDevTools();
 };
 
 app.on('ready', createWindow);
@@ -79,7 +79,7 @@ ipc.on("insert_data", (event, arg) => {
     // Attempt to connect and execute queries if connection goes through
     connection.on("connect", err => {
       if (err) {
-        event.reply("connect_err", ["Invalid credentials: Unable to connect"]);
+        event.reply("err", [err.message]);
         console.error(err.message);
       } 
       else {
@@ -94,10 +94,10 @@ ipc.on("insert_data", (event, arg) => {
       const request = new Request(setIdentity + arg[0], (err, rowCount) => {
         if (err){
           if (err.toString().includes("duplicate")){
-            event.reply("insert_err", ["Duplicate key error: Please update CampID"]);
+            event.reply("err", [err.message]);
           }
           else{
-            event.reply("insert_err", ["Invalid SQL syntax: Unable to insert"]);
+            event.reply("err", [err.message]);
           }
           console.error(err.message);
         }
