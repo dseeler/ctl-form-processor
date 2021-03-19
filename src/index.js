@@ -10,6 +10,7 @@ const campID = document.getElementById("campID");
 const campID_button = document.getElementById("campID-button");
 setCampID();
 
+// Send data to backend on Connect button click
 sendButton.addEventListener("click", () => {
    try{
       const username = document.getElementById("username").value; // uga-ctl
@@ -17,13 +18,16 @@ sendButton.addEventListener("click", () => {
       const server = document.getElementById("server").value; // ctl.database.windows.net
       const database = document.getElementById("database").value; // CTL-SQL
 
-      // Send to backend
+      // Send
       ipc.send("insert_data", [bulkStmnt, username, password, server, database]);
+
+      // Reset styling
       statusMsg.style.color = "black";
       statusMsg.innerHTML = "Connecting...";
       sendButton.disabled = true;
       campID_button.disabled = true;
 
+      // On successful connection to Azure DB
       ipc.on("connect_success", (event, arg) => {
          try{
             statusMsg.style.color = "green";
@@ -35,6 +39,7 @@ sendButton.addEventListener("click", () => {
          }
       });
 
+      // On connection or insert error
       ipc.on("err", (event, arg) => {
          try{
             statusMsg.style.color = "red";
@@ -46,6 +51,7 @@ sendButton.addEventListener("click", () => {
          }
       });
 
+      // On insert success
       ipc.on("insert_success", (event, arg) => {
          try{
             statusMsg.style.color = "green";
@@ -64,8 +70,8 @@ sendButton.addEventListener("click", () => {
    }
 });
 
-// Read file input
-let insertStmnts = []; // Copy/Paste output
+// Process Excel file
+let insertStmnts = []; // Raw SQL inserts for copy and paste (not sent to backend -- only for display/reference)
 let bulkStmnt = ""; // Bulk SQL statement to be inserted into DB
 input.addEventListener("input", () => {
    try{
@@ -73,7 +79,6 @@ input.addEventListener("input", () => {
       // Clear existing output
       insertStmnts = [];
       bulkStmnt = insertPrefix;
-
       document.getElementById("raw-sql").innerHTML = "";
       document.getElementById("process-count").innerHTML = "Processing...";
       statusMsg.innerHTML = "";
@@ -89,9 +94,6 @@ input.addEventListener("input", () => {
             // code
             sql += insertPrefix + "(";
             bulkStmnt += "(";
-
-            // 56 Insert values
-            // 56 values, should be 57 (from excel)
 
             // CampID
             sql += "'" + (parseInt(campID.value) + i - 1) + "'"; // Retrieve CampID
@@ -325,9 +327,9 @@ input.addEventListener("input", () => {
             sql += formatCell(""); // No value?
             bulkStmnt += formatCell("");
 
+            /*
             // Horseback
             // Change any 0's to blank cells
-            /*
             if (rows[i][16] == null || rows[i][16] == 0){
                // Blank
                sql += formatCell(""); // No value?
@@ -337,9 +339,11 @@ input.addEventListener("input", () => {
             }
             */
             
-            // Close VALUES
+            // Close statement VALUES
             sql += ");";
 
+
+            // Close bulk statement VALUES
             if (i != rows.length - 1){
                bulkStmnt += "),";
             }
@@ -350,11 +354,8 @@ input.addEventListener("input", () => {
             // Add SQL insert statement to list
             insertStmnts.push(sql);
 
-            // Add raw sql to UI
-            document.getElementById("raw-sql").innerHTML += "<div>" + sql + "</div>" + 
-            "<br><span>---------------------------- <b>" + i + 
-            "</b> ----------------------------</span><br><br>";
-
+            // Add raw SQL output
+            document.getElementById("raw-sql").innerHTML += "<div>" + sql + "</div>" + "<br><span>---------------------------- <b>" + i + "</b> ----------------------------</span><br><br>";
             document.getElementById("process-count").innerHTML = insertStmnts.length + " forms processed";
          }
 
