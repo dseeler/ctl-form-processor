@@ -40,7 +40,6 @@ body {
 }
 
 #input[type="file"]:hover{
-  cursor: pointer;
   background-color: whitesmoke;
 }
 
@@ -146,4 +145,25 @@ footer{
 
 footer a{
   text-decoration: none;
+}
+
+#refresh-button{
+  position: absolute;
+  bottom: 9px;
+  left: 15px;
+  background: none;
+  border: none;
+}
+
+#refresh-button:hover{
+  cursor: pointer;
+}
+
+#refresh-button:focus{
+  outline: none;
+}
+
+#refresh-icon{
+  width: 25px;
+  height: 25px;
 }

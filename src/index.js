@@ -3,6 +3,7 @@ const ipc = electron.ipcRenderer;
 const reader = require("read-excel-file");
 const fs = require("fs");
 
+// HTML elements
 const input = document.getElementById("input");
 const sendButton = document.getElementById("sendButton");
 const statusMsg = document.getElementById("status");
@@ -353,17 +354,20 @@ input.addEventListener("input", () => {
             document.getElementById("process-count").innerHTML = insertStmnts.length + " forms processed";
          }
 
+         // Enable connecting and inserting data to DB after uploading .xlsx file
          sendButton.disabled = false;
 
       }).catch(error => console.log(error));
    }
    catch(e){ 
+      // Unprocessable .xlsx file
       input.style.border = "1px solid red";
       document.getElementById("raw-sql").innerHTML = "Invalid .xlsx file";
       console.error(e);
    }
 });
    
+// Format each value to SQL and CTL standards
 function formatCell(data, type){
    if (data != null){
       data = data.toString().replaceAll("'", "").trim(); // Remove all '
@@ -427,6 +431,7 @@ function formatCell(data, type){
    return ",'" + data + "'";
 }
 
+// Return month number
 function getMonth(month){
    switch (month){
       case "Jan": 
@@ -597,26 +602,34 @@ const state_abbrev = {
    'wyoming': 'WY'
 }
 
+// Unlock file input after updating CampID
 campID_button.addEventListener("click", () => {
    if (campID.value != ""){
       input.disabled = false;
       input.style.backgroundColor = "white";
       campID.style.border = "1px solid black";
       document.getElementById("campID-notice").style.display = "none";
+      input.style.cursor = "pointer";
    }
    else{
       campID.style.border = "1px solid red";
    }
 });
 
-function reset(){
-
-}
-
+// Undo all error styling
 function revertErrorStyling(){
    statusMsg.style.color = "black";
    azureDiv.style.border = "1px solid black";
    campID.style.border = "1px solid black";
-   input.style.border = "1px solid black";
    outputContainer.style.border = "1px solid black";
 }
+
+// Refresh the input on click (to allow re-uploading the same file)
+input.addEventListener("click", () => {
+   input.value = "";
+});
+
+// Refresh the app
+document.getElementById("refresh-button").addEventListener("click", () => {
+   location.reload();
+});
