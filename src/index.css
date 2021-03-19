@@ -34,7 +34,7 @@ body {
 #input{
   margin-top: -10px;
   margin-bottom: 15px;
-  background-color: white;
+  background-color: whitesmoke;
   border: 1px dashed black;
   padding: 73px 58px 73px 58px;
 }
@@ -113,6 +113,14 @@ input, #raw-sql-container, #azure-div{
   height: 20px;
   margin-left: 1em;
   margin-bottom: .5em;
+}
+
+#campID-notice{
+  font-size: 13px;
+  position: absolute;
+  top: 135px;
+  left: 80px;
+  opacity: .7;
 }
 
 #sendButton {

@@ -10,10 +10,11 @@
       <h1>CTL Form Processor</h1>
       <div id="campID-div">
         <label for="campID">Next available CampID:</label>
-        <input id="campID" type="text">
+        <input id="campID" type="text" autofocus required>
         <button id="campID-button">Update</button>
       </div>  
-      <input id="input" type="file" title="" enctype="multipart/form-data" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+      <input id="input" type="file" title="" enctype="multipart/form-data" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" disabled>
+      <span id="campID-notice">Enter the next available CampID to proceed</span>
       <div id="azure-div">
         <h3 id="azure-title">Connect to Azure SQL Server</h3>
         <label for="username">Username: </label>

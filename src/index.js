@@ -7,8 +7,10 @@ const input = document.getElementById("input");
 const sendButton = document.getElementById("sendButton");
 const statusMsg = document.getElementById("status");
 const campID = document.getElementById("campID");
+const azureDiv = document.getElementById("azure-div");
 const campID_button = document.getElementById("campID-button");
-setCampID();
+const output = document.getElementById("raw-sql");
+const outputContainer = document.getElementById("raw-sql-container");
 
 // Send data to backend on Connect button click
 sendButton.addEventListener("click", () => {
@@ -22,46 +24,36 @@ sendButton.addEventListener("click", () => {
       ipc.send("insert_data", [bulkStmnt, username, password, server, database]);
 
       // Reset styling
-      statusMsg.style.color = "black";
+      revertErrorStyling();
       statusMsg.innerHTML = "Connecting...";
-      sendButton.disabled = true;
-      campID_button.disabled = true;
-
-      // On successful connection to Azure DB
-      ipc.on("connect_success", (event, arg) => {
-         try{
-            statusMsg.style.color = "green";
-            statusMsg.innerHTML = arg[0];
-            campID_button.disabled = false;
-         }
-         catch (e){
-            console.error(e);
-         }
-      });
 
       // On connection or insert error
       ipc.on("err", (event, arg) => {
-         try{
-            statusMsg.style.color = "red";
+         statusMsg.style.color = "red";
+
+         if (arg[1].includes("Connection Error")){
+            azureDiv.style.border = "1px solid red";
             statusMsg.innerHTML = arg[0];
-            campID_button.disabled = false;
          }
-         catch (e){
-            console.error(e);
+         else if (arg[1].includes("Duplicate Key")){
+            campID.style.border = "1px solid red";
+            statusMsg.innerHTML = arg[1];
+            output.innerHTML = "<div style='color: red'>" + arg[0] + "<br><br><b>Update the CampID and re-upload the file</b></div>";
+
+         }
+         else if (arg[1].includes("Invalid SQL")){
+            statusMsg.innerHTML = arg[1];
+            outputContainer.style.border = "1px solid red";
+            output.innerHTML = "<div style='color: red'>" + arg[0] + "</div>" + 
+            "<span style='color: red'>------------------------------------------------------------</span><br>" + output.innerHTML; 
          }
       });
 
-      // On insert success
-      ipc.on("insert_success", (event, arg) => {
-         try{
+      // On connection/insert success
+      ipc.on("success", (event, arg) => {
+         statusMsg.innerHTML = arg[0];
+         if (arg[0].includes("Database updated!")){
             statusMsg.style.color = "green";
-            statusMsg.innerHTML = arg[0];
-            campID_button.disabled = false;
-            const new_id = insertStmnts.length + parseInt(campID.value);
-            updateCampID(new_id.toString());
-         }
-         catch (e){
-            console.error(e);
          }
       });
    }
@@ -79,10 +71,12 @@ input.addEventListener("input", () => {
       // Clear existing output
       insertStmnts = [];
       bulkStmnt = insertPrefix;
+
+      // Reset text and styling
       document.getElementById("raw-sql").innerHTML = "";
       document.getElementById("process-count").innerHTML = "Processing...";
       statusMsg.innerHTML = "";
-      statusMsg.style.color = "black";
+      revertErrorStyling();
 
       // Extract .xlsx data by cell
       reader(input.files[0]).then((rows) => {
@@ -359,13 +353,13 @@ input.addEventListener("input", () => {
             document.getElementById("process-count").innerHTML = insertStmnts.length + " forms processed";
          }
 
-         // Enable Connect & Insert Data button
          sendButton.disabled = false;
-         campID_button.disabled = false;
+
       }).catch(error => console.log(error));
    }
-   catch(e){
-      document.getElementById("raw-sql").innerHTML = "<div style='color: red'>Error: Invalid .xlsx file</div>";
+   catch(e){ 
+      input.style.border = "1px solid red";
+      document.getElementById("raw-sql").innerHTML = "Invalid .xlsx file";
       console.error(e);
    }
 });
@@ -603,40 +597,26 @@ const state_abbrev = {
    'wyoming': 'WY'
 }
 
-function setCampID(){
-   try{
-      fs.readFile("src/camp_id.txt", (err, buf) => {
-         campID.value = buf.toString();
-      });
-   }
-   catch (e){
-      console.error(e);
-   }
-}
-
-function updateCampID(id){
-   try{
-      fs.writeFile("src/camp_id.txt", id, (err) => {
-         if (err){
-            console.log(err);
-         }
-      });
-      campID.value = id;
-   }
-   catch (e){
-      console.error(e);
-   }
-}
-
 campID_button.addEventListener("click", () => {
-   try{
-      fs.writeFile("src/camp_id.txt", campID.value, (err) => {
-         if (err){
-            console.log(err);
-         }
-      });
+   if (campID.value != ""){
+      input.disabled = false;
+      input.style.backgroundColor = "white";
+      campID.style.border = "1px solid black";
+      document.getElementById("campID-notice").style.display = "none";
    }
-   catch (e){
-      console.error(e);
+   else{
+      campID.style.border = "1px solid red";
    }
 });
+
+function reset(){
+
+}
+
+function revertErrorStyling(){
+   statusMsg.style.color = "black";
+   azureDiv.style.border = "1px solid black";
+   campID.style.border = "1px solid black";
+   input.style.border = "1px solid black";
+   outputContainer.style.border = "1px solid black";
+}

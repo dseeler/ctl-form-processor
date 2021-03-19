@@ -55,9 +55,11 @@ app.on('activate', () => {
   }
 });
 
-// CONNECT TO AZURE, INSERT SQL INTO DATABASE
+// Connect to Azure Camp DB and insert data
 ipc.on("insert_data", (event, arg) => {
   try {
+
+    // Connection credentials
     const config = {
       authentication: {
         options: {
@@ -73,31 +75,31 @@ ipc.on("insert_data", (event, arg) => {
       }
     };
 
+    // Establish a connection
     const connection = new Connection(config);
     connection.connect();
 
-    // Attempt to connect and execute queries if connection goes through
+    // On successful connection, insert data
     connection.on("connect", err => {
       if (err) {
-        event.reply("err", [err.message]);
+        event.reply("err", [err.message, "Connection Error"]);
         console.error(err.message);
       } 
       else {
-        event.reply("connect_success", ["Connected! Inserting data..."]);
+        event.reply("success", ["Inserting data..."]);
         insertData();
       }
     });
 
     function insertData(){
       const setIdentity = "SET IDENTITY_INSERT dbo.CAMPSESSIONS ON;\n";
-      console.log(setIdentity + arg[0]);
       const request = new Request(setIdentity + arg[0], (err, rowCount) => {
         if (err){
           if (err.toString().includes("duplicate")){
-            event.reply("err", [err.message]);
+            event.reply("err", [err.message, "Duplicate Key: The given CampID is already in use"]);
           }
           else{
-            event.reply("err", [err.message]);
+            event.reply("err", [err.message, "Invalid SQL: The provided .xlsx file is not in proper format"]);
           }
           console.error(err.message);
         }
@@ -106,7 +108,7 @@ ipc.on("insert_data", (event, arg) => {
 
       request.on("doneProc", (rowCount, more, returnStatus, rows) => {
         if (returnStatus == 0){
-          event.reply("insert_success", ["Database updated!"]);
+          event.reply("success", ["Database updated!"]);
         }
       });
     }
