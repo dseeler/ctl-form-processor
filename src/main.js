@@ -18,7 +18,7 @@ let window;
 
 // Create electron window
 const createWindow = () => {
-  const window = new BrowserWindow({
+  window = new BrowserWindow({
     width: 800,
     height: 600,
     resizable: false,
@@ -58,7 +58,6 @@ app.on('activate', () => {
 // Connect to Azure Camp DB and insert data
 ipc.on("insert_data", (event, arg) => {
   try {
-
     // Azure credentials + DB specification
     const config = {
       authentication: {
@@ -91,6 +90,7 @@ ipc.on("insert_data", (event, arg) => {
       }
     });
 
+    // Execute SQL queries
     function insertData(){
       const setIdentity = "SET IDENTITY_INSERT dbo.CAMPSESSIONS ON;\n";
       const request = new Request(setIdentity + arg[0], (err, rowCount) => {
@@ -106,6 +106,7 @@ ipc.on("insert_data", (event, arg) => {
       });
       connection.execSql(request);
 
+      // Query response
       request.on("doneProc", (rowCount, more, returnStatus, rows) => {
         if (returnStatus == 0){
           event.reply("success", ["Database updated!"]);

@@ -18,21 +18,25 @@
       <div id="azure-div">
         <h3 id="azure-title">Connect to Azure SQL Server</h3>
         <label for="username">Username: </label>
-        <input id="username" type="text" required value="uga-ctl">
+        <input id="username" type="text" required>
         <br>
         <label for="password">Password: </label>
-        <input id="password" type="password" required value="123abc_321">
+        <input id="password" type="password" required>
         <br>
         <label for="server">Server: </label>
-        <input id="server" type="text" required value="ctl.database.windows.net">
+        <input id="server" type="text" required>
         <br>
         <label for="database">Database: </label>
-        <input id="database" type="text" required value="CTL-SQL">
+        <input id="database" type="text" required>
         <br>
         <button id="sendButton" disabled>Connect & Insert data</button>
         <div id="status-div">
           <span id="status"></span>
         </div>
+      </div>
+      <div id="remember-div">
+        <label for="remember" id="remember-label">Remember credentials?</label>
+        <input id="remember-input" type="checkbox">
       </div>
 
     </div>

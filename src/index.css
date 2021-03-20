@@ -124,7 +124,7 @@ input, #raw-sql-container, #azure-div{
 
 #sendButton {
   padding: 0 20px 0 20px;
-  margin-top: 12px;
+  margin-top: 28px;
   margin-left: 80px;
 }
 
@@ -166,4 +166,27 @@ footer a{
 #refresh-icon{
   width: 25px;
   height: 25px;
+}
+
+#azure-title{
+  margin-top: 11px;
+  margin-bottom: 12px;
+}
+
+#remember-div{
+  bottom: 112px;
+  position: absolute;
+  left: 135px;
+}
+
+#remember-label{
+  font-size: 13px;
+}
+
+#remember-input{
+  margin-left: 0px;
+}
+
+#remember-input:hover{
+  cursor: pointer;
 }

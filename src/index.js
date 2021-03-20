@@ -17,10 +17,13 @@ const outputTitle = document.getElementById("process-count");
 // Send data to backend on Connect button click
 sendButton.addEventListener("click", () => {
    try{
-      const username = document.getElementById("username").value; // uga-ctl
-      const password = document.getElementById("password").value; // 123abc_321
-      const server = document.getElementById("server").value; // ctl.database.windows.net
-      const database = document.getElementById("database").value; // CTL-SQL
+      // Disable send button (prevent flooding sockets)
+      sendButton.disabled = true;
+
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value; 
+      const server = document.getElementById("server").value; 
+      const database = document.getElementById("database").value; 
 
       // Send
       ipc.send("insert_data", [bulkStmnt, username, password, server, database]);
@@ -356,6 +359,7 @@ input.addEventListener("input", () => {
             outputTitle.innerHTML = insertStmnts.length + " forms processed";
          }
 
+         // Append update queries
          bulkStmnt += appendUpdateQueries(rows.length - 1);
 
          // Enable connecting to DB after uploading .xlsx file (also enable update CampID button)
@@ -684,3 +688,49 @@ input.addEventListener("click", () => {
 document.getElementById("refresh-button").addEventListener("click", () => {
    location.reload();
 });
+
+// Save credentials if remember credentials is checked (delete if unchecked)
+document.getElementById("remember-input").addEventListener("change", () => {
+   try{
+      if (document.getElementById("remember-input").checked){
+         const credentials = username.value + " " + password.value + " " + server.value + " " + database.value;
+         fs.writeFile("src/config/credentials.txt", credentials, (err) => {
+            if (err){
+               console.log(err);
+            }
+         });
+      }
+      else{
+         fs.writeFile("src/config/credentials.txt", "", (err) => {
+            if (err){
+               console.log(err);
+            }
+         });
+      }
+   }
+   catch (e){
+      console.error(e);
+   }
+});
+
+// Check if remembered credentials is set
+window.onload = (event) => {
+   try {
+      fs.readFile("src/config/credentials.txt", (err, buf) => {
+         if (err){
+            console.log(err);
+         }
+         else if (buf.toString().length > 0){
+            document.getElementById("remember-input").checked = true;
+            const credentials = buf.toString().split(" ");
+            username.value = credentials[0];
+            password.value = credentials[1];
+            server.value = credentials[2];
+            database.value = credentials[3];
+         }
+      });
+   }
+   catch (e){
+      console.error(e);
+   }
+}
