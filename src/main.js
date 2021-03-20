@@ -59,7 +59,7 @@ app.on('activate', () => {
 ipc.on("insert_data", (event, arg) => {
   try {
 
-    // Connection credentials
+    // Azure credentials + DB specification
     const config = {
       authentication: {
         options: {

@@ -12,6 +12,7 @@ const azureDiv = document.getElementById("azure-div");
 const campID_button = document.getElementById("campID-button");
 const output = document.getElementById("raw-sql");
 const outputContainer = document.getElementById("raw-sql-container");
+const outputTitle = document.getElementById("process-count");
 
 // Send data to backend on Connect button click
 sendButton.addEventListener("click", () => {
@@ -68,6 +69,8 @@ let insertStmnts = []; // Raw SQL inserts for copy and paste (not sent to backen
 let bulkStmnt = ""; // Bulk SQL statement to be inserted into DB
 input.addEventListener("input", () => {
    try{
+      // Disable Update CampID
+      campID_button.disabled = true;
 
       // Clear existing output
       insertStmnts = [];
@@ -337,8 +340,7 @@ input.addEventListener("input", () => {
             // Close statement VALUES
             sql += ");";
 
-
-            // Close bulk statement VALUES
+            // Close bulk statement VALUES or add another set of VALUES
             if (i != rows.length - 1){
                bulkStmnt += "),";
             }
@@ -350,27 +352,75 @@ input.addEventListener("input", () => {
             insertStmnts.push(sql);
 
             // Add raw SQL output
-            document.getElementById("raw-sql").innerHTML += "<div>" + sql + "</div>" + "<br><span>---------------------------- <b>" + i + "</b> ----------------------------</span><br><br>";
-            document.getElementById("process-count").innerHTML = insertStmnts.length + " forms processed";
+            output.innerHTML += "<div>" + sql + "</div>" + "<br><span>---------------------------- <b>" + i + "</b> ----------------------------</span><br><br>";
+            outputTitle.innerHTML = insertStmnts.length + " forms processed";
          }
 
-         // Enable connecting and inserting data to DB after uploading .xlsx file
+         bulkStmnt += appendUpdateQueries(rows.length - 1);
+
+         // Enable connecting to DB after uploading .xlsx file (also enable update CampID button)
          sendButton.disabled = false;
+         campID_button.disabled = false;
 
       }).catch(error => console.log(error));
    }
    catch(e){ 
       // Unprocessable .xlsx file
       input.style.border = "1px solid red";
-      document.getElementById("raw-sql").innerHTML = "Invalid .xlsx file";
-      console.error(e);
+      output.style.color = "red";
+      output.innerHTML = e;
    }
 });
+
+// Create and return update queries to append to bulkStmnt
+function appendUpdateQueries(num_records){
+   let queries = "";
+   let campID_values = "VALUES ";
+   let whereClause = "WHERE ";
+
+   // Extract all CampIDs from records
+   for (let i = 0; i < num_records; i++){
+      // Create VALUES
+      campID_values += "('" + (parseInt(campID.value) + i) + "')";
+      
+      // Create WHERE clause
+      whereClause += "CampID = " + (parseInt(campID.value) + i);
+
+      // Append sequential characters
+      if (i != num_records - 1){
+         campID_values += ", ";
+         whereClause += " OR ";
+      }
+      else{
+         campID_values += ";\n";
+         whereClause += ";\n";
+      }
+   }
+   
+   // Insert CampIDs into BillingData and ContractData tables
+   queries += "\nINSERT INTO DBO.BillingData ([CampID]) " + campID_values;
+   queries += "INSERT INTO DBO.ContractData ([CampID]) " + campID_values; 
+
+   // BillingData update query
+   queries += "\nUPDATE dbo.BillingData\nSET DepositReceived=0, depositPartial=0, depositWO=0, payment1Billed=0, Payment1Received=0, " +
+   "Payment1Partial=0, payment1WO=0, payment2billed=0, payment2received=0, payment2partial=0, payment2wo=0, dirpayment1billed=0, " +
+   "dirpayment1received=0, dirpayment1partial=0, dirpayment1wo=0, dirpayment2billed=0, dirpayment2received=0, dirpayment2partial=0, " +
+   "dirpayment2wo = 0,SFKCreditApplied=0, accountclosed=0, BillStatus='Pre-Contract'\n" + whereClause;
+
+   // ContractData update query
+   queries += "UPDATE dbo.ContractData\nSET ExclusiveUse=0 " + whereClause;
+
+   // Display update queries in Raw SQL Output
+   output.innerHTML += "<span>--------------------- <b>Update Queries</b> ---------------------</span><br></br>" +
+   "<div>" + queries + "</div>";
+
+   return queries;
+}
    
 // Format each value to SQL and CTL standards
 function formatCell(data, type){
    if (data != null){
-      data = data.toString().replaceAll("'", "").trim(); // Remove all '
+      data = data.toString().replaceAll("'", "").trim(); // Remove all 's
    }
    else{
       data = ""; // Replace nulls
@@ -543,6 +593,7 @@ const partnerIDs = {
    "Experience Camps": 92
 };
 
+// State abbreviation dictionary
 const state_abbrev = {
    'alabama': 'AL',
    'alaska': 'AK',
