@@ -31,6 +31,10 @@ body {
   width: 127px;
 }
 
+#campID-button:hover{
+  cursor: pointer;
+}
+
 #input{
   margin-top: -10px;
   margin-bottom: 15px;
@@ -98,6 +102,12 @@ input, #raw-sql-container, #azure-div{
   margin-top: 6px;
   font-size: 12px;
   text-align: center;
+  width: 369px;
+  margin-left: -20px;
+}
+
+#status{
+  margin-left: 29px;
 }
 
 #azure-div label {
@@ -125,7 +135,7 @@ input, #raw-sql-container, #azure-div{
 #sendButton {
   padding: 0 20px 0 20px;
   margin-top: 28px;
-  margin-left: 80px;
+  margin-left: 93px;
 }
 
 #sendButton:hover {

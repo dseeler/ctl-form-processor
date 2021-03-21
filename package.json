@@ -1,8 +1,8 @@
 {
   "name": "ctl-form-processor",
-  "productName": "ctl-form-processor",
-  "version": "1.0.5",
-  "description": "My Electron application description",
+  "productName": "CTL Form Processor",
+  "version": "1.0.6",
+  "description": "Automates the processing and insertion of lengthy camp forms into Azure SQL Server",
   "main": "src/main.js",
   "scripts": {
     "start": "electron-forge start",

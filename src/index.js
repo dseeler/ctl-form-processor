@@ -25,7 +25,7 @@ sendButton.addEventListener("click", () => {
       const server = document.getElementById("server").value; 
       const database = document.getElementById("database").value; 
 
-      // Send
+      // Send data and Azure credentials to backend
       ipc.send("insert_data", [bulkStmnt, username, password, server, database]);
 
       // Reset styling
@@ -207,13 +207,13 @@ input.addEventListener("input", () => {
 
             // CampContactZip
             // Check if someone used "NA" for their second contact
-            if (rows[i][33] == "NA"){
-               sql += formatCell(rows[i][39], "zip");
-               bulkStmnt += formatCell(rows[i][39], "zip");
+            if (rows[i][33].includes("NA") || rows[i][33].includes("N/A")){
+               sql += formatCell(0); 
+               bulkStmnt += formatCell(0);
             }
             else{
-               sql += formatCell(0); // No value?
-               bulkStmnt += formatCell(0);
+               sql += formatCell(rows[i][39], "zip");
+               bulkStmnt += formatCell(rows[i][39], "zip");
             }
             
             // CTLStaffContact
@@ -327,18 +327,6 @@ input.addEventListener("input", () => {
             // DirNotes
             sql += formatCell(""); // No value?
             bulkStmnt += formatCell("");
-
-            /*
-            // Horseback
-            // Change any 0's to blank cells
-            if (rows[i][16] == null || rows[i][16] == 0){
-               // Blank
-               sql += formatCell(""); // No value?
-            }
-            else{
-               sql += formatCell(rows[i][16]);
-            }
-            */
             
             // Close statement VALUES
             sql += ");";
@@ -424,7 +412,7 @@ function appendUpdateQueries(num_records){
 // Format each value to SQL and CTL standards
 function formatCell(data, type){
    if (data != null){
-      data = data.toString().replaceAll("'", "").trim(); // Remove all 's
+      data = data.toString().replaceAll("'", "").replaceAll("\"", "").trim(); // Remove all quotations
    }
    else{
       data = ""; // Replace nulls
@@ -433,7 +421,7 @@ function formatCell(data, type){
    // Specific formatting
    switch (type){
       case "time":
-         if (data.includes(":")){
+         if (data.includes(":")){ // Check if cell contains proper time format
             const hour = data.substring(0, data.indexOf(":"));
             const minute = data.substring(data.indexOf(":"), data.indexOf(":") + 3);
             if (data.toUpperCase().includes("AM")){
@@ -443,7 +431,7 @@ function formatCell(data, type){
                data = hour + minute + " PM";
             }
          }
-         else if (/\d/.test(data)){
+         else if (/\d/.test(data)){ // Check if cell contains a number
             const hour = data.match(/\d/)[0];
             const minute = ":00";
             if (data.toUpperCase().includes("AM")){
@@ -463,8 +451,15 @@ function formatCell(data, type){
          data = month + "/" + day + "/" + year;
       break;
       case "zip":
-         if (data.length >= 5){
-            data = data.substring(0, 5);
+         // Extract the 5 characters for zip code
+         if (/[a-zA-Z]/.test(data)){
+            data = 0;
+         }
+         else if (data.length >= 5){
+            data = data.substring(0, 5);            
+         }
+         else{
+            data = 0;
          }
       break;
       case "state":
@@ -516,7 +511,13 @@ function getMonth(month){
 }
 
 // Static prefix
-const insertPrefix = "INSERT into DBO.CAMPSESSIONS ([CampID],[PartnerID],[CampProgram],[SummerOrNonSummer],[SiteLocation],[CamperType],[StartDate],[EndDate],[CheckInTime],[CheckOutTime],[CamperDays],[CamperMeals],[VolunteerDays],[VolunteerMeals],[BillingContactName],[BillingContactEmail],[BillingContactPhone],[BillingContactAddress],[BillingContactCity],[BillingContactState],[BillingContactZip],[CampContactName],[CampContactEmail],[CampContactPhone],[CampContactAdress],[CampContactCity],[CampContactState],[CampContactZip],[CTLStaffContact],[CTLDirected],[PreArrivalFormsComplete],[IntacctCampSessionID],[ProgramNotes],[FoodServiceNotes],[FacilityNotes],[IncidentNotes],[PartnershipNotes],[ProgramNeeds],[MealsRequested],[CabinsProjected],[BuildingNeeds],[EquipmentNeeds],[FullProgramStaff],[DayStaff],[NeedsNotes],[CampCancelled],[DirMedicalTeam],[DirMedicalTeamNotes],[DirBillableHours],[DirBillableHoursNotes],[DirVolunteers],[DirStaffingRatioNotes],[DirAddlEveningProgram],[DirTshirts],[DirPhotography],[DirNotes]) VALUES ";
+const insertPrefix = "INSERT into DBO.CAMPSESSIONS ([CampID],[PartnerID],[CampProgram],[SummerOrNonSummer],[SiteLocation],[CamperType],[StartDate]," +
+"[EndDate],[CheckInTime],[CheckOutTime],[CamperDays],[CamperMeals],[VolunteerDays],[VolunteerMeals],[BillingContactName],[BillingContactEmail]," +
+"[BillingContactPhone],[BillingContactAddress],[BillingContactCity],[BillingContactState],[BillingContactZip],[CampContactName],[CampContactEmail]," +
+"[CampContactPhone],[CampContactAdress],[CampContactCity],[CampContactState],[CampContactZip],[CTLStaffContact],[CTLDirected],[PreArrivalFormsComplete]," +
+"[IntacctCampSessionID],[ProgramNotes],[FoodServiceNotes],[FacilityNotes],[IncidentNotes],[PartnershipNotes],[ProgramNeeds],[MealsRequested],[CabinsProjected]," +
+"[BuildingNeeds],[EquipmentNeeds],[FullProgramStaff],[DayStaff],[NeedsNotes],[CampCancelled],[DirMedicalTeam],[DirMedicalTeamNotes],[DirBillableHours]," +
+"[DirBillableHoursNotes],[DirVolunteers],[DirStaffingRatioNotes],[DirAddlEveningProgram],[DirTshirts],[DirPhotography],[DirNotes]) VALUES ";
 
 // Partner Organization dictionary
 const partnerIDs = {
