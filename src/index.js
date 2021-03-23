@@ -70,14 +70,16 @@ sendButton.addEventListener("click", () => {
 // Process Excel file
 let insertStmnts = []; // Raw SQL inserts for copy and paste (not sent to backend -- only for display/reference)
 let bulkStmnt = ""; // Bulk SQL statement to be inserted into DB
+let userGroups = []; // UserGroup info to be inserted into BillingData and ContractData tables (separate from bulkStmnt)
 input.addEventListener("input", () => {
    try{
       // Disable Update CampID
       campID_button.disabled = true;
 
-      // Clear existing output
+      // Clear existing data
       insertStmnts = [];
       bulkStmnt = insertPrefix;
+      userGroups = [];
 
       // Reset text and styling
       document.getElementById("raw-sql").innerHTML = "";
@@ -100,7 +102,6 @@ input.addEventListener("input", () => {
             sql += "'" + (parseInt(campID.value) + i - 1) + "'"; // Retrieve CampID
             bulkStmnt += "'" + (parseInt(campID.value) + i - 1) + "'";
             
-
             // PartnerID
             sql += formatCell(partnerIDs[rows[i][5]]);
             bulkStmnt += formatCell(partnerIDs[rows[i][5]]);
@@ -345,10 +346,13 @@ input.addEventListener("input", () => {
             // Add raw SQL output
             output.innerHTML += "<div>" + sql + "</div>" + "<br><span>---------------------------- <b>" + i + "</b> ----------------------------</span><br><br>";
             outputTitle.innerHTML = insertStmnts.length + " forms processed";
+
+            // Add UserGroup info (Season, # of Summer Campers, # of Summer Staff, # Ages 0-5, # Ages 6+, # of Nonsummer Staff)
+            userGroups.push([rows[i][9], rows[i][11], rows[i][12], rows[i][13], rows[i][14], rows[i][15]]);
          }
 
          // Append update queries
-         bulkStmnt += appendUpdateQueries(rows.length - 1);
+         bulkStmnt += appendUpdateQueries(rows.length - 1, userGroups);
 
          // Enable connecting to DB after uploading .xlsx file (also enable update CampID button)
          sendButton.disabled = false;
@@ -364,49 +368,64 @@ input.addEventListener("input", () => {
    }
 });
 
-// Create and return update queries to append to bulkStmnt
-function appendUpdateQueries(num_records){
-   let queries = "";
-   let campID_values = "VALUES ";
-   let whereClause = "WHERE ";
+// Create and return BillingData and ContractData queries to append to bulkStmnt
+function appendUpdateQueries(num_records, userGroups){
+   try{
+      let queries = "";
+      let billingValues = "";
+      let contractValues = "";
+      let whereClause = "WHERE ";
 
-   // Extract all CampIDs from records
-   for (let i = 0; i < num_records; i++){
-      // Create VALUES
-      campID_values += "('" + (parseInt(campID.value) + i) + "')";
+      // Build BillingData insert statement, ContractData insert statement, and WHERE clause for updates
+      for (let i = 0; i < num_records; i++){
+         whereClause += "CampID = " + (parseInt(campID.value) + i);
+
+         // UserGroups for Summer Camp/Non Summer Camps
+         if (userGroups[i][0] == "Summer Camp"){
+            billingValues += "(" + (parseInt(campID.value) + i) + ", " + userGroups[i][1] + ", " + userGroups[i][2] + ", " + "0)";
+            contractValues += "(" + (parseInt(campID.value) + i) + ", 'Summer Campers', 'Summer Staff and Volunteers', 'N/A')"; 
+         }
+         else{
+            billingValues += "(" + (parseInt(campID.value) + i) + ", " + userGroups[i][3] + ", " + userGroups[i][4] + ", " + userGroups[i][5] + ")";
+            contractValues += "(" + (parseInt(campID.value) + i) + ", 'Ages 0-5', 'Ages 6+', 'Nonsummer Staff and Volunteers')";
+         }
+
+         // Append sequential characters
+         if (i != num_records - 1){
+            billingValues += ", ";
+            contractValues += ", ";
+            whereClause += " OR ";
+         }
+         else{
+            billingValues += ";\n";
+            contractValues += ";\n";
+            whereClause += ";\n";
+         }
+      }
       
-      // Create WHERE clause
-      whereClause += "CampID = " + (parseInt(campID.value) + i);
+      // Insert CampIDs and UserGroup data into BillingData and ContractData tables
+      queries += "\nINSERT INTO DBO.BillingData ([CampID], [UserGroup1Projected], [UserGroup2Projected], [UserGroup3Projected]) VALUES " + billingValues;
+      queries += "INSERT INTO DBO.ContractData ([CampID], [UserGroup1], [UserGroup2], [UserGroup3]) VALUES " + contractValues; 
 
-      // Append sequential characters
-      if (i != num_records - 1){
-         campID_values += ", ";
-         whereClause += " OR ";
-      }
-      else{
-         campID_values += ";\n";
-         whereClause += ";\n";
-      }
+      // BillingData update query
+      queries += "\nUPDATE dbo.BillingData\nSET MealsandLodgingFee = 0, DamagesFee = 0, ExtraProgramFee = 0, OtherFees = 0," +
+      "DepositReceived=0, depositPartial=0, depositWO=0, payment1Billed=0, Payment1Received=0, " +
+      "Payment1Partial=0, payment1WO=0, payment2billed=0, payment2received=0, payment2partial=0, payment2wo=0, dirpayment1billed=0, " +
+      "dirpayment1received=0, dirpayment1partial=0, dirpayment1wo=0, dirpayment2billed=0, dirpayment2received=0, dirpayment2partial=0, " +
+      "dirpayment2wo = 0,SFKCreditApplied=0, accountclosed=0, BillStatus='1'\n" + whereClause;
+
+      // ContractData update query
+      queries += "UPDATE dbo.ContractData\nSET ExclusiveUse=0 " + whereClause; // Include NonBillable but it doesn't exist?
+
+      // Display update queries in Raw SQL Output
+      output.innerHTML += "<span>--------------------- <b>Update Queries</b> ---------------------</span><br></br>" +
+      "<div>" + queries + "</div>";
+
+      return queries;
    }
-   
-   // Insert CampIDs into BillingData and ContractData tables
-   queries += "\nINSERT INTO DBO.BillingData ([CampID]) " + campID_values;
-   queries += "INSERT INTO DBO.ContractData ([CampID]) " + campID_values; 
-
-   // BillingData update query
-   queries += "\nUPDATE dbo.BillingData\nSET DepositReceived=0, depositPartial=0, depositWO=0, payment1Billed=0, Payment1Received=0, " +
-   "Payment1Partial=0, payment1WO=0, payment2billed=0, payment2received=0, payment2partial=0, payment2wo=0, dirpayment1billed=0, " +
-   "dirpayment1received=0, dirpayment1partial=0, dirpayment1wo=0, dirpayment2billed=0, dirpayment2received=0, dirpayment2partial=0, " +
-   "dirpayment2wo = 0,SFKCreditApplied=0, accountclosed=0, BillStatus='Pre-Contract'\n" + whereClause;
-
-   // ContractData update query
-   queries += "UPDATE dbo.ContractData\nSET ExclusiveUse=0 " + whereClause;
-
-   // Display update queries in Raw SQL Output
-   output.innerHTML += "<span>--------------------- <b>Update Queries</b> ---------------------</span><br></br>" +
-   "<div>" + queries + "</div>";
-
-   return queries;
+   catch (e){
+      console.error(e);
+   }
 }
    
 // Format each value to SQL and CTL standards

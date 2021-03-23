@@ -38,7 +38,7 @@ const createWindow = () => {
     window = null;
   });
 
-  //window.webContents.openDevTools();
+  window.webContents.openDevTools();
 };
 
 app.on('ready', createWindow);
