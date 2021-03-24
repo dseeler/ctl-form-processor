@@ -1,59 +1,63 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>ctl-form-processor</title>
-    <link rel="stylesheet" href="index.css">
-  </head>
-  <body>
-    <div id="content-left">
-      <h1>CTL Form Processor</h1>
-      <div id="campID-div">
-        <label for="campID">Next available CampID:</label>
-        <input id="campID" type="text" autofocus required>
-        <button id="campID-button">Update</button>
-      </div>  
-      <input id="input" type="file" title="" enctype="multipart/form-data" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" disabled>
-      <span id="campID-notice">Enter the next available CampID to proceed</span>
-      <div id="azure-div">
-        <h3 id="azure-title">Connect to Azure SQL Server</h3>
-        <label for="username">Username: </label>
-        <input id="username" type="text" required>
-        <br>
-        <label for="password">Password: </label>
-        <input id="password" type="password" required>
-        <br>
-        <label for="server">Server: </label>
-        <input id="server" type="text" required>
-        <br>
-        <label for="database">Database: </label>
-        <input id="database" type="text" required>
-        <br>
-        <button id="sendButton" disabled>Connect & Insert data</button>
-        <div id="status-div">
-          <span id="status"></span>
-        </div>
-      </div>
-      <div id="remember-div">
-        <label for="remember" id="remember-label">Remember credentials?</label>
-        <input id="remember-input" type="checkbox">
-      </div>
 
-    </div>
-    <div id="content-right">
-      <h3 id="process-count">Raw SQL Output</h3>
-      <div id="raw-sql-container">
-        <div id="raw-sql"></div>
-      </div>
-    </div>
-    <script type="module">
-      require('./index.js');
-    </script>
-    <footer>
-      UGA Student Project 2021 | <a href="mailto: das09474@uga.edu">Bugs or update requests</a>
-    </footer>
-    <button id="refresh-button" onclick="refresh()">
-      <img src="images/refresh.png" id="refresh-icon">
-    </button>
-  </body>
+<head>
+	<meta charset="UTF-8">
+	<title>Camp Twin Lakes Form Processor</title>
+	<link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+	<div id="content-left">
+		<h1>CTL Form Processor</h1>
+		<div id="campID-div">
+			<label for="campID">Next available CampID:</label>
+			<input id="campID" type="text" autofocus required>
+			<button id="campID-button">Update</button>
+		</div>
+		<input id="input" type="file" title="" enctype="multipart/form-data"
+			accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" disabled>
+		<span id="campID-notice">Enter the next available CampID to proceed</span>
+		<div id="azure-div">
+			<h3 id="azure-title">Connect to Azure SQL Server</h3>
+			<label for="username">Username: </label>
+			<input id="username" type="text" required>
+			<br>
+			<label for="password">Password: </label>
+			<input id="password" type="password" required>
+			<br>
+			<label for="server">Server: </label>
+			<input id="server" type="text" required>
+			<br>
+			<label for="database">Database: </label>
+			<input id="database" type="text" required>
+			<br>
+			<button id="sendButton" disabled>Connect & Insert data</button>
+			<div id="status-div">
+				<span id="status"></span>
+			</div>
+		</div>
+		<div id="remember-div">
+			<label for="remember" id="remember-label">Remember credentials?</label>
+			<input id="remember-input" type="checkbox">
+		</div>
+
+	</div>
+	<div id="content-right">
+		<h3 id="process-count">Raw SQL Output</h3>
+		<div id="raw-sql-container">
+			<div id="raw-sql"></div>
+		</div>
+	</div>
+	<script type="module">
+		require('./index.js');
+	</script>
+	<footer>
+		UGA Student Project 2021 | <a href="mailto: das09474@uga.edu">Bugs or update requests</a>
+	</footer>
+	<button id="refresh-button" onclick="refresh()">
+		<img src="images/refresh.png" id="refresh-icon">
+	</button>
+</body>
+
 </html>
