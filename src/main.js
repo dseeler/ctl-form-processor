@@ -4,10 +4,12 @@ const BrowserWindow = electron.BrowserWindow;
 const path = require("path");
 const url = require("url");
 const ipc = electron.ipcMain;
+const fs = require("fs");
 
 // Azure communication
 const Connection = require("tedious").Connection;
 const Request = require("tedious").Request;
+const { ipcMain } = require("electron");
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -99,7 +101,7 @@ ipc.on("insert_data", (event, arg) => {
 						event.reply("err", [err.message, "Duplicate Key: The given CampID is already in use"]);
 					}
 					else {
-						event.reply("err", [err.message, "Invalid SQL: The provided .xlsx file is not in proper format"]);
+						event.reply("err", [err.message, "Invalid SQL: Please fix the .xlsx file"]);
 					}
 					console.error(err.message);
 				}
@@ -117,4 +119,29 @@ ipc.on("insert_data", (event, arg) => {
 	catch (e) {
 		console.error(e);
 	}
+});
+
+// Frontend will request remembered credentials when app is loaded
+ipcMain.on("creds_req", (event, arg) => {
+	try{
+		const filePath = path.join(app.getPath("userData"), "credentials.txt");
+		fs.readFile(filePath, (err, buf) => {
+			if (err) {
+				console.log(err);
+			}
+			else if (buf.toString().length > 0) {
+				const credentials = buf.toString().split(" ");
+				event.reply("creds_res", credentials);
+			}
+		});
+	}
+	catch (e){
+		console.error(e);
+	}
+});
+
+// Update remembered credentialss
+ipcMain.on("update_creds", (event, arg) => {
+	const filePath = path.join(app.getPath("userData"), "credentials.txt");
+	fs.writeFileSync(filePath, arg);
 });

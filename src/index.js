@@ -330,6 +330,18 @@ input.addEventListener("input", () => {
 				sql += formatCell(""); // No value?
 				bulkStmnt += formatCell("");
 
+				// Horseback
+				// Change any 0's to blank cells
+				if (rows[i][16] == null || rows[i][16] == 0){
+					// Blank
+					sql += formatCell(""); // No value?
+					bulkStmnt += formatCell("");
+				}
+				else{
+					sql += formatCell(rows[i][16]);
+					bulkStmnt += formatCell(rows[i][16]);
+				}
+
 				// Close statement VALUES
 				sql += ");";
 
@@ -534,7 +546,7 @@ const insertPrefix = "INSERT into DBO.CAMPSESSIONS ([CampID],[PartnerID],[CampPr
 	"[CampContactPhone],[CampContactAdress],[CampContactCity],[CampContactState],[CampContactZip],[CTLStaffContact],[CTLDirected],[PreArrivalFormsComplete]," +
 	"[IntacctCampSessionID],[ProgramNotes],[FoodServiceNotes],[FacilityNotes],[IncidentNotes],[PartnershipNotes],[ProgramNeeds],[MealsRequested],[CabinsProjected]," +
 	"[BuildingNeeds],[EquipmentNeeds],[FullProgramStaff],[DayStaff],[NeedsNotes],[CampCancelled],[DirMedicalTeam],[DirMedicalTeamNotes],[DirBillableHours]," +
-	"[DirBillableHoursNotes],[DirVolunteers],[DirStaffingRatioNotes],[DirAddlEveningProgram],[DirTshirts],[DirPhotography],[DirNotes]) VALUES ";
+	"[DirBillableHoursNotes],[DirVolunteers],[DirStaffingRatioNotes],[DirAddlEveningProgram],[DirTshirts],[DirPhotography],[DirNotes],[NSHorseback]) VALUES ";
 
 // Partner Organization dictionary
 const partnerIDs = {
@@ -707,23 +719,15 @@ document.getElementById("refresh-button").addEventListener("click", () => {
 	location.reload();
 });
 
-// Save credentials if remember credentials is checked (delete if unchecked)
-document.getElementById("remember-input").addEventListener("change", () => {
+// If saving credentials is set, set data to backend and save
+document.getElementById("remember-input").addEventListener("click", () => {
 	try {
 		if (document.getElementById("remember-input").checked) {
 			const credentials = username.value + " " + password.value + " " + server.value + " " + database.value;
-			fs.writeFile("src/config/credentials.txt", credentials, (err) => {
-				if (err) {
-					console.log(err);
-				}
-			});
+			ipc.send("update_creds", credentials);
 		}
 		else {
-			fs.writeFile("src/config/credentials.txt", "", (err) => {
-				if (err) {
-					console.log(err);
-				}
-			});
+			ipc.send("update_creds", "");
 		}
 	}
 	catch (e) {
@@ -731,24 +735,27 @@ document.getElementById("remember-input").addEventListener("change", () => {
 	}
 });
 
-// Check if remembered credentials is set
+// Check for any remembered credentials when the app is loading up
 window.onload = (event) => {
 	try {
-		fs.readFile("src/config/credentials.txt", (err, buf) => {
-			if (err) {
-				console.log(err);
-			}
-			else if (buf.toString().length > 0) {
-				document.getElementById("remember-input").checked = true;
-				const credentials = buf.toString().split(" ");
-				username.value = credentials[0];
-				password.value = credentials[1];
-				server.value = credentials[2];
-				database.value = credentials[3];
-			}
-		});
+		// Ask the backend
+		ipc.send("creds_req");
 	}
 	catch (e) {
 		console.error(e);
 	}
 }
+
+// Backend remembered credentials response 
+ipc.on("creds_res", (event, arg) => {
+	try{
+		document.getElementById("remember-input").checked = true;
+		username.value = arg[0];
+		password.value = arg[1];
+		server.value = arg[2];
+		database.value = arg[3];
+	}
+	catch(e){
+		console.error(e);
+	}
+});

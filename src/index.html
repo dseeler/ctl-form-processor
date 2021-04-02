@@ -32,14 +32,12 @@
 			<label for="database">Database: </label>
 			<input id="database" type="text" required>
 			<br>
+			<label for="remember" id="remember-label">Remember credentials?</label>
+			<input id="remember-input" type="checkbox">
 			<button id="sendButton" disabled>Connect & Insert data</button>
 			<div id="status-div">
 				<span id="status"></span>
 			</div>
-		</div>
-		<div id="remember-div">
-			<label for="remember" id="remember-label">Remember credentials?</label>
-			<input id="remember-input" type="checkbox">
 		</div>
 
 	</div>
@@ -49,15 +47,15 @@
 			<div id="raw-sql"></div>
 		</div>
 	</div>
-	<script type="module">
-		require('./index.js');
-	</script>
 	<footer>
-		UGA Student Project 2021 | <a href="mailto: das09474@uga.edu">Bugs or update requests</a>
+		UGA Student Project 2021 | <a href="https://github.com/dseeler/ctl-form-processor/issues">Bugs or update requests</a>
 	</footer>
 	<button id="refresh-button" onclick="refresh()">
 		<img src="images/refresh.png" id="refresh-icon">
 	</button>
+	<script type="module">
+		require('./index.js');
+	</script>
 </body>
 
 </html>

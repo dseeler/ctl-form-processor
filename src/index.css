@@ -117,7 +117,9 @@ input, #raw-sql-container, #azure-div{
   margin-top: 4px;
 }
 
-#azure-div input {
+
+
+#username, #password, #server, #database {
   width: 200px;
   height: 20px;
   margin-left: 1em;
@@ -134,8 +136,8 @@ input, #raw-sql-container, #azure-div{
 
 #sendButton {
   padding: 0 20px 0 20px;
-  margin-top: 28px;
   margin-left: 93px;
+
 }
 
 #sendButton:hover {
@@ -183,20 +185,21 @@ footer a{
   margin-bottom: 12px;
 }
 
-#remember-div{
-  bottom: 112px;
-  position: absolute;
-  left: 135px;
-}
-
 #remember-label{
   font-size: 13px;
+  margin-left: 87px;
+  width: 150px !important;
+  margin-right: -100px;
+  margin-top: 0px !important;
+  margin-bottom: 10px !important;
 }
 
 #remember-input{
-  margin-left: 0px;
+  margin-top: -2px !important;
+  margin-left: 105px !important;
 }
 
 #remember-input:hover{
   cursor: pointer;
 }
+
