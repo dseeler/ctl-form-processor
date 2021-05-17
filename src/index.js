@@ -364,7 +364,7 @@ input.addEventListener("input", () => {
 				userGroups.push([rows[i][9], rows[i][11], rows[i][12], rows[i][13], rows[i][14], rows[i][15]]);
 			}
 
-			// Append update queries
+			// Append update queries			
 			bulkStmnt += appendUpdateQueries(rows.length - 1, userGroups);
 
 			// Enable connecting to DB after uploading .xlsx file (also enable update CampID button)
@@ -489,14 +489,14 @@ function appendUpdateQueries(num_records, userGroups) {
 		queries += "INSERT INTO DBO.ContractData ([CampID], [UserGroup1], [UserGroup2], [UserGroup3]) " + contractValues;
 
 		// BillingData update query
-		queries += "\nUPDATE dbo.BillingData\nSET MealsandLodgingFee = 0, DamagesFee = 0, ExtraProgramFee = 0, OtherFees = 0," +
+		queries += "\nUPDATE dbo.BillingData\nSET DamagesFee=0, ExtraProgramFee=0, OtherFees=0," +
 			"DepositReceived=0, depositPartial=0, depositWO=0, payment1Billed=0, Payment1Received=0, " +
 			"Payment1Partial=0, payment1WO=0, payment2billed=0, payment2received=0, payment2partial=0, payment2wo=0, dirpayment1billed=0, " +
 			"dirpayment1received=0, dirpayment1partial=0, dirpayment1wo=0, dirpayment2billed=0, dirpayment2received=0, dirpayment2partial=0, " +
-			"dirpayment2wo=0,SFKCreditApplied=0, accountclosed=0, BillStatus=1 \n" + whereClause;
+			"dirpayment2wo=0,SFKCreditApplied=0, accountclosed=0, BillStatus=1, MealsFee=0, LodgingFee=0 \n" + whereClause;
 
 		// ContractData update query
-		queries += "UPDATE dbo.ContractData\nSET NonBillable=0, ExclusiveUse=0 \n" + whereClause;
+		queries += "UPDATE dbo.ContractData\nSET NonBillable=0, ExclusiveUse=0, DataReadyForInvoice=0 \n" + whereClause;
 
 		// Display update queries in Raw SQL Output
 		output.innerHTML += "<span>--------------- <b>Update Queries (All in one)</b> ---------------</span><br></br>" +

@@ -40,7 +40,7 @@ body {
   margin-bottom: 15px;
   background-color: whitesmoke;
   border: 1px dashed black;
-  padding: 73px 58px 73px 58px;
+  padding: 40px 58px 40px 58px;
 }
 
 #input[type="file"]:hover{
@@ -127,9 +127,9 @@ input, #raw-sql-container, #azure-div{
 }
 
 #campID-notice{
-  font-size: 13px;
+  font-size: 11px;
   position: absolute;
-  top: 135px;
+  top: 110px;
   left: 80px;
   opacity: .7;
 }
