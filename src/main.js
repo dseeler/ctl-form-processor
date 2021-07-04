@@ -64,14 +64,14 @@ ipc.on("insert_data", (event, arg) => {
 		const config = {
 			authentication: {
 				options: {
-					userName: arg[1],
-					password: arg[2]
+					userName: arg[2],
+					password: arg[3]
 				},
 				type: "default"
 			},
-			server: arg[3],
+			server: arg[4],
 			options: {
-				database: arg[4],
+				database: arg[5],
 				encrypt: true
 			}
 		};
@@ -95,7 +95,15 @@ ipc.on("insert_data", (event, arg) => {
 		// Execute SQL queries
 		function insertData() {
 			const setIdentity = "SET IDENTITY_INSERT dbo.CAMPSESSIONS ON;\n";
-			const request = new Request(setIdentity + arg[0], (err, rowCount) => {
+
+			// Update query to be executed if insert query is successful
+			const updateRequest = new Request(setIdentity + arg[1], (err, rowCount) => {
+				if (err) {
+					console.error(err.message);
+				}
+			});
+		
+			const insertRequest = new Request(setIdentity + arg[0], (err, rowCount) => {
 				if (err) {
 					if (err.toString().includes("duplicate")) {
 						event.reply("err", [err.message, "Duplicate Key: The given CampID is already in use"]);
@@ -105,11 +113,16 @@ ipc.on("insert_data", (event, arg) => {
 					}
 					console.error(err.message);
 				}
+				else{
+					// Execute update query if no errors from insert
+					connection.execSql(updateRequest);
+				}
 			});
-			connection.execSql(request);
+
+			connection.execSql(insertRequest);
 
 			// Query response
-			request.on("doneProc", (rowCount, more, returnStatus, rows) => {
+			updateRequest.on("doneProc", (rowCount, more, returnStatus, rows) => {
 				if (returnStatus == 0) {
 					event.reply("success", ["Database updated!"]);
 				}

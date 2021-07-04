@@ -94,7 +94,7 @@ input, #raw-sql-container, #azure-div{
 #azure-div{
   border: 1px solid black;
   background-color: white;
-  height: 250px;
+  height: 255px;
   padding-left: 20px;
 }
 
@@ -116,8 +116,6 @@ input, #raw-sql-container, #azure-div{
   text-align: right;
   margin-top: 4px;
 }
-
-
 
 #username, #password, #server, #database {
   width: 200px;

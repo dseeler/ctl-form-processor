@@ -26,7 +26,7 @@ sendButton.addEventListener("click", () => {
 		const database = document.getElementById("database").value;
 
 		// Send data and Azure credentials to backend
-		ipc.send("insert_data", [bulkStmnt, username, password, server, database]);
+		ipc.send("insert_data", [bulkStmnt, updateStmnt, username, password, server, database]);
 
 		// Reset styling
 		revertErrorStyling();
@@ -71,6 +71,7 @@ sendButton.addEventListener("click", () => {
 // Process Excel file
 let insertStmnts = []; // Raw SQL inserts for copy and paste (not sent to backend -- only for display/reference)
 let bulkStmnt = ""; // Bulk SQL statement to be inserted into DB
+let updateStmnt = ""; // SQL statement to update Billing and Contract data tables
 let userGroups = []; // UserGroup info to be inserted into BillingData and ContractData tables
 input.addEventListener("input", () => {
 	try {
@@ -364,8 +365,8 @@ input.addEventListener("input", () => {
 				userGroups.push([rows[i][9], rows[i][11], rows[i][12], rows[i][13], rows[i][14], rows[i][15]]);
 			}
 
-			// Append update queries			
-			bulkStmnt += appendUpdateQueries(rows.length - 1, userGroups);
+			// Create update query
+			updateStmnt = appendUpdateQueries(rows.length - 1, userGroups);
 
 			// Enable connecting to DB after uploading .xlsx file (also enable update CampID button)
 			sendButton.disabled = false;
@@ -393,6 +394,10 @@ function formatCell(data, type) {
 	// Specific formatting
 	switch (type) {
 		case "time":
+
+			// Remove any periods in AM or PM
+			data = data.replace(".", "");
+			
 			if (data.includes(":")) { // Check if cell contains proper time format
 				const hour = data.substring(0, data.indexOf(":"));
 				const minute = data.substring(data.indexOf(":"), data.indexOf(":") + 3);
