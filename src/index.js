@@ -156,34 +156,6 @@ input.addEventListener("input", () => {
 				sql += formatCell(0); // No value?
 				bulkStmnt += formatCell(0);
 
-				// BillingContactName
-				sql += formatCell(rows[i][26]);
-				bulkStmnt += formatCell(rows[i][26]);
-
-				// BillingContactEmail
-				sql += formatCell(rows[i][27]);
-				bulkStmnt += formatCell(rows[i][27]);
-
-				// BillingContactPhone
-				sql += formatCell(rows[i][28]);
-				bulkStmnt += formatCell(rows[i][28]);
-
-				// BillingContactAddress
-				sql += formatCell(rows[i][29]);
-				bulkStmnt += formatCell(rows[i][29]);
-
-				// BillingContactCity
-				sql += formatCell(rows[i][30]);
-				bulkStmnt += formatCell(rows[i][30]);
-
-				// BillingContactState
-				sql += formatCell(rows[i][31]);
-				bulkStmnt += formatCell(rows[i][31]);
-
-				// BillingContactZip
-				sql += formatCell(rows[i][32], "zip");
-				bulkStmnt += formatCell(rows[i][32], "zip");
-
 				// CampContactName
 				sql += formatCell(rows[i][33]);
 				bulkStmnt += formatCell(rows[i][33]);
@@ -218,6 +190,34 @@ input.addEventListener("input", () => {
 					sql += formatCell(rows[i][39], "zip");
 					bulkStmnt += formatCell(rows[i][39], "zip");
 				}
+
+				// BillingContactName
+				sql += formatCell(rows[i][26]);
+				bulkStmnt += formatCell(rows[i][26]);
+
+				// BillingContactEmail
+				sql += formatCell(rows[i][27]);
+				bulkStmnt += formatCell(rows[i][27]);
+
+				// BillingContactPhone
+				sql += formatCell(rows[i][28]);
+				bulkStmnt += formatCell(rows[i][28]);
+
+				// BillingContactAddress
+				sql += formatCell(rows[i][29]);
+				bulkStmnt += formatCell(rows[i][29]);
+
+				// BillingContactCity
+				sql += formatCell(rows[i][30]);
+				bulkStmnt += formatCell(rows[i][30]);
+
+				// BillingContactState
+				sql += formatCell(rows[i][31]);
+				bulkStmnt += formatCell(rows[i][31]);
+
+				// BillingContactZip
+				sql += formatCell(rows[i][32], "zip");
+				bulkStmnt += formatCell(rows[i][32], "zip");
 
 				// CTLStaffContact
 				sql += formatCell(""); // No value?
