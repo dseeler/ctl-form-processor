@@ -1,7 +1,7 @@
 {
   "name": "ctl-form-processor",
   "productName": "ctl-form-processor",
-  "version": "1.0.12",
+  "version": "1.0.14",
   "description": "Automates the processing and insertion of lengthy camp forms into Azure SQL Server",
   "main": "src/main.js",
   "scripts": {
