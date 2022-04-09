@@ -1,7 +1,7 @@
 {
   "name": "ctl-form-processor",
   "productName": "ctl-form-processor",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Automates the processing and insertion of lengthy camp forms into Azure SQL Server",
   "main": "src/main.js",
   "scripts": {
@@ -52,19 +52,13 @@
             }
           }
         }
-      ],
-      "github_repository": {
-        "owner": "dseeler",
-        "name": "ctl-form-processor"
-      }
+      ]
     }
   },
   "dependencies": {
-    "electron-forge": "^5.2.4",
     "electron-squirrel-startup": "^1.0.0",
     "read-excel-file": "^5.0.0",
-    "tedious": "^11.0.5",
-    "yarn": "^1.22.17"
+    "tedious": "^11.0.5"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.54",
@@ -73,8 +67,6 @@
     "@electron-forge/maker-squirrel": "^6.0.0-beta.54",
     "@electron-forge/maker-zip": "^6.0.0-beta.54",
     "@electron-forge/publisher-github": "^6.0.0-beta.54",
-    "electron": "12.0.0",
-    "electron-compile": "^6.4.4",
-    "electron-prebuilt-compile": "8.2.0"
+    "electron": "12.0.0"
   }
 }
